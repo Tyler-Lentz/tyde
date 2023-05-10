@@ -26,6 +26,7 @@
     }
 
     textarea::selection {
+
         background-color: var(--highlight-color);
         color: var(--highlight-color);
     }

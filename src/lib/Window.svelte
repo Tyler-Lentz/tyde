@@ -21,7 +21,7 @@
     }
 
     div {
-        background-color: var(--secondary-color);
+        background-color: var(--dark-bg-color);
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
