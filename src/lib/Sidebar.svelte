@@ -17,7 +17,7 @@
         width:auto;
         padding: 0;
         margin: 0;
-        color: var(--text-default-color);
+        color: var(--text-highlight-color);
         background-color: var(--dark-bg-color);
     }
 
