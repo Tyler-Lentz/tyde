@@ -51,6 +51,7 @@
         height: 95vh;
         color: var(--text-highlight-color);
         overflow: hidden;
+        text-align: right;
     }
 
     textarea.line_nums::selection {
