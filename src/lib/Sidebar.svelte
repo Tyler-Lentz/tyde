@@ -1,11 +1,18 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-    import { files, current_file } from '../stores';
+    import { files } from '../stores';
+
+    export let current_file: number | null;
+
+    function handleClick(event: Event) {
+        if (event.target instanceof HTMLLIElement) {
+            current_file = event.target.dataset.selected === 'true' ? null : parseInt(event.target.dataset.index || '0');
+        }
+    }
 </script>
 
 <ol>
     {#each $files as file, i}
-        <li data-selected={$current_file === i}>{file.name}</li>
+        <li on:click={handleClick} data-index={i} data-selected={current_file === i}>{file.name}</li>
     {/each}
 </ol>
 
