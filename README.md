@@ -10,9 +10,8 @@ A custom IDE developed mainly for fun and to learn Rust and Svelte through Tauri
 ## TODO
 
 ### Short Term
-- actually wire up the ui to show names of opened files
 - save files
-- line numbers
+- close file that has been opened
 
 ### Long Term
 - navigation shortcuts
