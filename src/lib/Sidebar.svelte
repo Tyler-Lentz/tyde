@@ -1,12 +1,11 @@
 <script lang="ts">
-    import type { File } from '../defs';    
-    import { files } from '../stores';
-
+	import { onDestroy } from 'svelte';
+    import { files, current_file } from '../stores';
 </script>
 
 <ol>
-    {#each $files as file}
-        <li>{file.name}</li>
+    {#each $files as file, i}
+        <li data-selected={$current_file === i}>{file.name}</li>
     {/each}
 </ol>
 
@@ -36,7 +35,7 @@
         color: var(--text-highlight-color);
     }
 
-    li:hover, li:focus {
+    li:hover, li:focus, li[data-selected="true"] {
         background-color: var(--dark-highlight-color);
     }
 </style>

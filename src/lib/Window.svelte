@@ -3,13 +3,12 @@
     import Sidebar from './Sidebar.svelte';
     import TextEditor from './TextEditor.svelte';
     import { File } from '../defs';
-    import { files } from '../stores';
+    import { files, current_file } from '../stores';
 
-    let current_file: number | null = null;
     appWindow.listen('open-file', (event: any) => {
         files.update((files) => {
             files.push(new File(event.payload.name, event.payload.content));
-            current_file = files.length - 1;
+            current_file.set(files.length - 1);
             return files;
         });
     });
@@ -18,7 +17,7 @@
 <div>
     <Sidebar /> 
     {#each $files as file, i}
-        {#if current_file === i}
+        {#if $current_file === i}
             <TextEditor file={file} />
         {/if}
     {/each}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { File } from './defs';
+    import type { File } from '../defs';
 
     export let file: File;
 
