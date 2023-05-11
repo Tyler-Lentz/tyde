@@ -1,11 +1,27 @@
-<script>
+<script lang="ts">
+    import { appWindow } from '@tauri-apps/api/window';
     import Sidebar from './Sidebar.svelte';
     import TextEditor from './TextEditor.svelte';
+    import { File } from '../defs';
+    import { files } from '../stores';
+
+    let current_file: number | null = null;
+    appWindow.listen('open-file', (event: any) => {
+        files.update((files) => {
+            files.push(new File(event.payload.name, event.payload.content));
+            current_file = files.length - 1;
+            return files;
+        });
+    });
 </script>
 
 <div>
     <Sidebar /> 
-    <TextEditor />
+    {#each $files as file, i}
+        {#if current_file === i}
+            <TextEditor file={file} />
+        {/if}
+    {/each}
 </div>
 
 <style>
@@ -19,7 +35,6 @@
         --dark-highlight-color: rgb(99,112,112);
         --warning-color: rgb(180, 58, 58);
     }
-
     div {
         background-color: var(--darkest-bg-color);
         display: flex;

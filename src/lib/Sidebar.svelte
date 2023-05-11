@@ -1,10 +1,13 @@
-<script>
+<script lang="ts">
+    import type { File } from '../defs';    
+    import { files } from '../stores';
 
 </script>
 
 <ol>
-    <li>File 1</li>
-    <li>File 2</li>
+    {#each $files as file}
+        <li>{file.name}</li>
+    {/each}
 </ol>
 
 <style>
@@ -17,7 +20,6 @@
         width:auto;
         padding: 0;
         margin: 0;
-        color: var(--text-highlight-color);
         background-color: var(--dark-bg-color);
     }
 
@@ -31,6 +33,7 @@
         overflow-x: hidden;
         width: 10vw;
         white-space: nowrap;
+        color: var(--text-highlight-color);
     }
 
     li:hover, li:focus {

@@ -1,4 +1,4 @@
-use tauri::{Manager, CustomMenuItem, Menu, Submenu, WindowMenuEvent};
+use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder};
 use crate::filesystem;
 
@@ -17,8 +17,8 @@ fn handle_menu_events(event: WindowMenuEvent) {
                 let window = event.window();
                 if let Some(file_path) = file_path {
                     match filesystem::open_file(file_path) {
-                        Ok(file) => {
-                            let res = window.emit("open-file", filesystem::FileMessage{ file });
+                        Ok(message) => {
+                            let res = window.emit("open-file", message);
                             if let Err(e) = res {
                                 eprintln!("{}", e);
                             }
