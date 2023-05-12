@@ -20,7 +20,7 @@
     ol {
         list-style-type: none;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         justify-content: left;
         align-items: flex-start;
         width:auto;
@@ -40,6 +40,7 @@
         width: 10vw;
         white-space: nowrap;
         color: var(--text-highlight-color);
+        padding: 0.125rem;
     }
 
     li:hover, li:focus, li[data-selected="true"] {

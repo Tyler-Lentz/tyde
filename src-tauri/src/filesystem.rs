@@ -12,3 +12,9 @@ pub fn open_file(fname: PathBuf) -> Result<FileMessage, String> {
         name: fname.display().to_string()
     })
 }
+
+#[tauri::command]
+pub fn save_file(fpath: String, content: String) -> Result<(), String> {
+    fs::write(fpath, content).map_err(|e| e.to_string())?;
+    Ok(())
+}

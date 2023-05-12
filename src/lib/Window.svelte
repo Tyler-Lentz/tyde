@@ -1,5 +1,6 @@
 <script lang="ts">
     import { appWindow } from '@tauri-apps/api/window';
+    import { invoke } from '@tauri-apps/api/tauri'
     import Sidebar from './Sidebar.svelte';
     import TextEditor from './TextEditor.svelte';
     import { File } from '../defs';
@@ -13,6 +14,14 @@
             current_file = files.length - 1;
             return files;
         });
+    });
+
+    appWindow.listen('save-file', (_) => {
+        if (current_file !== null) {
+            invoke('save_file', { fpath: $files[current_file].absPath, content: $files[current_file].content }).then((_) => {
+                console.log('File saved');
+            });
+        }
     });
 </script>
 
@@ -39,7 +48,7 @@
     div {
         background-color: var(--darkest-bg-color);
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
         width: 100%;

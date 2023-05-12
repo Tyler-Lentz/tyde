@@ -44,7 +44,7 @@
     }
 
     textarea.line_nums {
-        height: 95vh;
+        height: 93vh;
         color: var(--text-highlight-color);
         overflow: hidden;
         text-align: right;
@@ -55,7 +55,7 @@
     }
 
     textarea.editor {
-        width: 95%;
+        width: 100%;
         height: var(--height);
         color: var(--text-default-color);
     }
