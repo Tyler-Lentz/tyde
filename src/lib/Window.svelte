@@ -3,23 +3,37 @@
     import { invoke } from '@tauri-apps/api/tauri'
     import Sidebar from './Sidebar.svelte';
     import TextEditor from './TextEditor.svelte';
+    import EditorConsole from './EditorConsole.svelte';
     import { File } from '../defs';
     import { files } from '../stores';
+
+    let console: EditorConsole;
 
     let current_file: number | null = null;
 
     appWindow.listen('open-file', (event: any) => {
         files.update((files) => {
-            files.push(new File(event.payload.name, event.payload.content));
+            let file = new File(event.payload.name, event.payload.content);
+
+            for (const f of files) {
+                if (f.absPath === file.absPath) {
+                    console.add(`File ${file.absPath} already open`);
+                    return files;
+                }
+            }
+
+            files.push(file);
             current_file = files.length - 1;
+            console.add(`Opened ${event.payload.name}`);
             return files;
         });
     });
 
     appWindow.listen('save-file', (_) => {
         if (current_file !== null) {
-            invoke('save_file', { fpath: $files[current_file].absPath, content: $files[current_file].content }).then((_) => {
-                console.log('File saved');
+            let file = $files[current_file];
+            invoke('save_file', { fpath: file.absPath, content: file.content }).then((_) => {
+                console.add(`Saved ${file.absPath}`)
             });
         }
     });
@@ -32,6 +46,7 @@
             <TextEditor file={file} />
         {/if}
     {/each}
+    <EditorConsole bind:this={console} full={false}/>
 </div>
 
 <style>

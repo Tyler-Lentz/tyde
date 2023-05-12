@@ -44,7 +44,7 @@
     }
 
     textarea.line_nums {
-        height: 93vh;
+        height: 90vh;
         color: var(--text-highlight-color);
         overflow: hidden;
         text-align: right;
