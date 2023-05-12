@@ -5,7 +5,7 @@
 
     function handleClick(event: Event) {
         if (event.target instanceof HTMLLIElement) {
-            current_file = event.target.dataset.selected === 'true' ? null : parseInt(event.target.dataset.index || '0');
+            current_file = event.target.dataset.selected === 'true' ? null : parseInt(event.target.dataset.index|| '0');
         }
     }
 </script>

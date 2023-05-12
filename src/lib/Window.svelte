@@ -7,7 +7,7 @@
     import { File } from '../defs';
     import { files } from '../stores';
 
-    let console: EditorConsole;
+    let econsole: EditorConsole;
 
     let current_file: number | null = null;
 
@@ -17,14 +17,14 @@
 
             for (const f of files) {
                 if (f.absPath === file.absPath) {
-                    console.add(`File ${file.absPath} already open`);
+                    econsole.add(`File ${file.absPath} already open`);
                     return files;
                 }
             }
 
             files.push(file);
             current_file = files.length - 1;
-            console.add(`Opened ${event.payload.name}`);
+            econsole.add(`Opened ${event.payload.name}`);
             return files;
         });
     });
@@ -33,7 +33,7 @@
         if (current_file !== null) {
             let file = $files[current_file];
             invoke('save_file', { fpath: file.absPath, content: file.content }).then((_) => {
-                console.add(`Saved ${file.absPath}`)
+                econsole.add(`Saved ${file.absPath}`)
             });
         }
     });
@@ -41,12 +41,15 @@
 
 <div>
     <Sidebar bind:current_file/> 
-    {#each $files as file, i}
+    <!-- {#each $files as file, i}
         {#if current_file === i}
             <TextEditor file={file} />
         {/if}
-    {/each}
-    <EditorConsole bind:this={console} full={false}/>
+    {/each} -->
+    {#if current_file !== null}
+        <TextEditor file={$files[current_file]} />
+    {/if}
+    <EditorConsole bind:this={econsole} full={false}/>
 </div>
 
 <style>

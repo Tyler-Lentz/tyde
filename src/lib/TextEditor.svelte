@@ -1,12 +1,13 @@
 <script lang="ts">
     import type { File } from '../defs';
+    import { slide } from 'svelte/transition';
 
     export let file: File;
 
     let num_lines: number = 0;
     let line_nums: String = '';
 
-    let font_size: number = 12; //pt
+    let font_size: number = 14; //pt
 
     let editor_elem: HTMLTextAreaElement;
     let line_nums_elem: HTMLTextAreaElement;
@@ -16,12 +17,12 @@
     }
 
     $: num_lines = file.content.split('\n').length;
-    $: line_nums = Array(num_lines).fill(0).map((_, num) => `${num}`).join('\n');
-    $: max_line_size = String(num_lines - 1).length * font_size;
+    $: line_nums = Array(num_lines).fill(0).map((_, num) => `${num+1}`).join('\n');
+    $: max_line_size = String(num_lines).length * font_size;
 
 </script>
 
-<div >
+<div transition:slide>
     <textarea bind:this={line_nums_elem} style:font_size class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
     <textarea bind:this={editor_elem} on:scroll={parseScroll} style:font_size class="editor" bind:value={file.content} ></textarea>
 </div>
@@ -31,6 +32,9 @@
         display: flex;
         flex-direction: row;
         width: 100%;
+        margin: 0;
+        border-top: 1px solid var(--dark-highlight-color);
+        border-right: 1px solid var(--dark-highlight-color);
     }
 
     textarea {
