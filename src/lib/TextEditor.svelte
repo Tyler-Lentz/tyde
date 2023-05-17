@@ -61,7 +61,6 @@
     textarea.editor {
         width: 100%;
         border-left: 1px solid var(--dark-highlight-color);
-        height: var(--height);
         color: var(--text-default-color);
     }
 

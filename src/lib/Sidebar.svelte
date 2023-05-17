@@ -33,6 +33,7 @@
     li {
         text-align: center;
         overflow-x: hidden;
+        min-width: min-content;
         width: 10vw;
         white-space: nowrap;
         color: var(--text-highlight-color);

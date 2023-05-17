@@ -1,22 +1,25 @@
 <script lang="ts">
-    export let full: boolean;
+    import ScreenDialog from './ScreenDialog.svelte';
+    let dialog: HTMLDialogElement;
+
     let history: Array<String> = [];
 
     export function add(message: String) {
         history.push(message);
         history = history;
     }
+
+    export function open() {
+        dialog.showModal()
+    }
 </script>
 
-{#if full}
-    <div>
-        {#each history as message}
-            <pre>{message}</pre>
-        {/each}
-    </div>
-{:else}
-    <pre>{history.at(-1) || ""}</pre>
-{/if}
+<pre on:click={open}>{history.at(-1) || ""}</pre>
+<ScreenDialog bind:dialog>
+    {#each history as message}
+        <pre style:border="none">{message}</pre>
+    {/each}
+</ScreenDialog>
 
 <style>
     pre {

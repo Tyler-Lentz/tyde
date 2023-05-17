@@ -49,7 +49,7 @@
     {#if current_file !== null}
         <TextEditor file={$files[current_file]} />
     {/if}
-    <EditorConsole bind:this={econsole} full={false}/>
+    <EditorConsole bind:this={econsole}/>
 </div>
 
 <style>
