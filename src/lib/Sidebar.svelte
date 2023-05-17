@@ -27,15 +27,11 @@
         padding: 0;
         margin: 0;
         background-color: var(--dark-bg-color);
-    }
-
-    li:last-child {
-        border-bottom: 1px solid var(--primary-color)
+        border-bottom: 1px solid var(--dark-highlight-color);
     }
 
     li {
-        border: 1px solid var(--primary-color);
-        border-bottom: none;
+        text-align: center;
         overflow-x: hidden;
         width: 10vw;
         white-space: nowrap;

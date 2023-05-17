@@ -7,7 +7,8 @@
     let num_lines: number = 0;
     let line_nums: String = '';
 
-    let font_size: number = 14; //pt
+    let font_size_num: number = 16; //pt
+    let font_size = `${font_size_num}px`;
 
     let editor_elem: HTMLTextAreaElement;
     let line_nums_elem: HTMLTextAreaElement;
@@ -18,23 +19,21 @@
 
     $: num_lines = file.content.split('\n').length;
     $: line_nums = Array(num_lines).fill(0).map((_, num) => `${num+1}`).join('\n');
-    $: max_line_size = String(num_lines).length * font_size;
+    $: max_line_size = String(num_lines).length * font_size_num;
 
 </script>
 
 <div transition:slide>
-    <textarea bind:this={line_nums_elem} style:font_size class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
-    <textarea bind:this={editor_elem} on:scroll={parseScroll} style:font_size class="editor" bind:value={file.content} ></textarea>
+    <textarea bind:this={line_nums_elem} class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
+    <textarea bind:this={editor_elem} on:scroll={parseScroll} class="editor" bind:value={file.content} ></textarea>
 </div>
 
-<style>
+<style >
     div {
         display: flex;
         flex-direction: row;
         width: 100%;
         margin: 0;
-        border-top: 1px solid var(--dark-highlight-color);
-        border-right: 1px solid var(--dark-highlight-color);
     }
 
     textarea {
@@ -42,9 +41,10 @@
         box-shadow: none;
         outline: 0;
         border: none;
-        border-left: 1px solid var(--dark-highlight-color);
         font-family: monospace;
         background-color: var(--dark-bg-color);
+        font-size: var(--font-size);
+        tab-size: 4;
     }
 
     textarea.line_nums {
@@ -60,6 +60,7 @@
 
     textarea.editor {
         width: 100%;
+        border-left: 1px solid var(--dark-highlight-color);
         height: var(--height);
         color: var(--text-default-color);
     }

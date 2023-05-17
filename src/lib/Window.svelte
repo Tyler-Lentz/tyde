@@ -62,6 +62,7 @@
         --highlight-color: rgb(179,143,80);
         --dark-highlight-color: rgb(99,112,112);
         --warning-color: rgb(180, 58, 58);
+        --font-size: 12pt;
     }
     div {
         background-color: var(--darkest-bg-color);

@@ -25,7 +25,7 @@
         padding: 0.125rem;
         margin: 0;
         padding: 0;
-        border: 1px solid var(--dark-highlight-color);
+        border-top: 1px solid var(--dark-highlight-color);
 
         width: 100%;
         height: 1.25rem;
