@@ -1,11 +1,12 @@
 <script lang="ts">
     import { appWindow } from '@tauri-apps/api/window';
     import { invoke } from '@tauri-apps/api/tauri'
-    import Sidebar from './Sidebar.svelte';
+    import Topbar from './Topbar.svelte';
     import TextEditor from './TextEditor.svelte';
     import EditorConsole from './EditorConsole.svelte';
     import { File } from '../defs';
     import { files } from '../stores';
+	import WorkspaceSidebar from './WorkspaceSidebar.svelte';
 
     let econsole: EditorConsole;
 
@@ -55,10 +56,13 @@
 </script>
 
 <div>
-    <Sidebar bind:current_file/> 
-    {#if current_file !== null}
-        <TextEditor file={$files[current_file]} />
-    {/if}
+    <Topbar bind:current_file/> 
+    <main>
+        <WorkspaceSidebar></WorkspaceSidebar> 
+        {#if current_file !== null}
+            <TextEditor file={$files[current_file]} />
+        {/if}
+    </main>
     <EditorConsole bind:this={econsole}/>
 </div>
 
@@ -78,6 +82,14 @@
         background-color: var(--darkest-bg-color);
         display: flex;
         flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        width: 100%;
+        height: 100%;
+    }
+    main {
+        display: flex;
+        flex-direction: row;
         justify-content: flex-start;
         align-items: flex-start;
         width: 100%;
