@@ -34,6 +34,7 @@
         text-align: center;
         overflow-x: hidden;
         min-width: min-content;
+        min-height: 1rem;
         width: 10vw;
         white-space: nowrap;
         color: var(--text-highlight-color);

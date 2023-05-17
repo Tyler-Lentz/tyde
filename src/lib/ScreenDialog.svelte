@@ -11,7 +11,7 @@
     dialog {
         width: 100%;
         height: 80%;
-        border: 1px solid var(--text-highlight-color);
+        border: 1px solid var(--dark-highlight-color);
         background-color: var(--dark-bg-color)
     }
 </style>

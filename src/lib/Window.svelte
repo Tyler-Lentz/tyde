@@ -32,20 +32,30 @@
     appWindow.listen('save-file', (_) => {
         if (current_file !== null) {
             let file = $files[current_file];
+            if (file.absPath === "") {
+                econsole.add(`Cannot save unnamed file`);
+                return;
+            }
+
             invoke('save_file', { fpath: file.absPath, content: file.content }).then((_) => {
                 econsole.add(`Saved ${file.absPath}`)
             });
         }
     });
+
+    appWindow.listen('new-file', (_) => {
+        files.update((files) => {
+            let file = new File("", "");
+            files.push(file);
+            current_file = files.length - 1;
+            econsole.add(`Created new file`);
+            return files;
+        });
+    });
 </script>
 
 <div>
     <Sidebar bind:current_file/> 
-    <!-- {#each $files as file, i}
-        {#if current_file === i}
-            <TextEditor file={file} />
-        {/if}
-    {/each} -->
     {#if current_file !== null}
         <TextEditor file={$files[current_file]} />
     {/if}

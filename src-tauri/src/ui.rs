@@ -5,7 +5,8 @@ use crate::filesystem;
 fn build_menu() -> Menu {
     let open = CustomMenuItem::new("open", "Open");
     let save = CustomMenuItem::new("save", "Save");
-    let file_menu = Submenu::new("File", Menu::new().add_item(open).add_item(save));
+    let new = CustomMenuItem::new("new", "New");
+    let file_menu = Submenu::new("File", Menu::new().add_item(open).add_item(save).add_item(new));
     Menu::new().add_submenu(file_menu)
 }
 
@@ -31,6 +32,12 @@ fn handle_menu_events(event: WindowMenuEvent) {
                         }
                     }
                 });
+        },
+        "new" => {
+            let res = event.window().emit("new-file", ());
+            if let Err(e) = res {
+                eprintln!("{}", e);
+            } 
         },
         "save" => {
             let res = event.window().emit("save-file", ());
