@@ -3,12 +3,13 @@
 </script>
 
 <div>
-    {name}
+    <p>{name}</p>
 </div>
 
 <style>
-    div {
+    p {
+        margin: 0;
+        margin-bottom: 5px;
         color: var(--text-default-color);
-        background-color: var(--dark-bg-color);
     }
 </style>

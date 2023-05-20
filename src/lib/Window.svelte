@@ -4,7 +4,7 @@
     import Topbar from './Topbar.svelte';
     import TextEditor from './TextEditor.svelte';
     import EditorConsole from './EditorConsole.svelte';
-    import { File } from '../defs';
+    import { Directory, File } from '../defs';
     import { files } from '../stores';
 	import WorkspaceSidebar from './WorkspaceSidebar.svelte';
 
@@ -53,12 +53,34 @@
             return files;
         });
     });
+
+    let dir = new Directory("/user", [
+        new Directory("/user/tuas", [
+            new Directory("/user/tuas/gcs", [
+                new File("/user/tuas/gcs/main.go", "content"),
+                new File("/user/tuas/gcs/datatypes.go", "content"),
+                new Directory("/user/tuas/gcs/internal", [
+                    new File("/user/tuas/gcs/internal/server.go", "content")
+                ]),
+                new File("/user/tuas/gcs/amogus.go", "content"),
+            ]),
+            new File("/user/tuas/temp.txt", "content"),
+            new Directory("/user/tuas/obc", [
+                new File("/user/tuas/obc/main.py", "content"),
+                new File("/user/tuas/obc/datatypes.py", "content"),
+                new Directory("/user/tuas/obc/internal", [
+                    new File("/user/tuas/obc/internal/server.py", "content")
+                ]),
+                new File("/user/tuas/obc/amogus.py", "content"),
+            ])
+        ])
+    ]);
 </script>
 
 <div>
     <Topbar bind:current_file/> 
     <main>
-        <WorkspaceSidebar></WorkspaceSidebar> 
+        <WorkspaceSidebar directory={dir}></WorkspaceSidebar> 
         {#if current_file !== null}
             <TextEditor file={$files[current_file]} />
         {/if}
