@@ -1,12 +1,10 @@
 <script lang="ts">
-    import type {FileSystemNode} from "../defs"
     import Icon from "./Icon.svelte"
     import type {Directory} from "../defs"
 
     export let directory: Directory | null;
 
     export let depth: string;
-    let active: boolean = true;
 
     export function toggle() {
         if (directory !== null) {

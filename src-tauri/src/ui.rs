@@ -47,10 +47,25 @@ fn handle_menu_events(event: WindowMenuEvent) {
             }
         },
         "open-directory" => {
-            let res = event.window().emit("open-directory", ());
-            if let Err(e) = res {
-                eprintln!("{}", e);
-            }
+            FileDialogBuilder::new()
+                .set_title("Select Directory to Open")
+                .pick_folder(move |dir_path| {
+                    let window = event.window();
+                    if let Some(dir_path) = dir_path {
+                        match filesystem::open_dir(dir_path) {
+                            Ok(message) => {
+                                let res = window.emit("open-directory", message);
+                                if let Err(e) = res {
+                                    eprintln!("{}", e);
+                                }
+                            },
+                            Err(e) => {
+                                MessageDialogBuilder::new("Error", &e.to_string())
+                                    .show(|_| {});
+                            }
+                        }
+                    }
+                });
         }
         _ => {},
     }

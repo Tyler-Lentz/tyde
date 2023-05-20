@@ -5,6 +5,7 @@
     import TextEditor from './TextEditor.svelte';
     import EditorConsole from './EditorConsole.svelte';
     import { Directory, File } from '../defs';
+    import type {FileSystemNode} from '../defs'
     import { files } from '../stores';
 	import WorkspaceSidebar from './WorkspaceSidebar.svelte';
 
@@ -59,32 +60,26 @@
 
     let empty_file = new File("null", null);
 
-    appWindow.listen('open-directory', (_) => {
-        let dir = new Directory("/user", [
-            new File("/user/test", "content"),
-            new File("/user/test2", "content"),
-            new File("/user/test3", "content"),
-            new Directory("/user/tuas", [
-                new Directory("/user/tuas/gcs", [
-                    new File("/user/tuas/gcs/main.go", "content"),
-                    new File("/user/tuas/gcs/datatypes.go", "content"),
-                    new Directory("/user/tuas/gcs/internal", [
-                        new File("/user/tuas/gcs/internal/server.go", "content")
-                    ],true),
-                    new File("/user/tuas/gcs/amogus.go", "content"),
-                ],true),
-                new File("/user/tuas/temp.txt", "content"),
-                new Directory("/user/tuas/obc", [
-                    new File("/user/tuas/obc/main.py", "content"),
-                    new File("/user/tuas/obc/datatypes.py", "content"),
-                    new Directory("/user/tuas/obc/internal", [
-                        new File("/user/tuas/obc/internal/server.py", "content")
-                    ],true),
-                    new File("/user/tuas/obc/amogus.py", "content"),
-                ], true)
-            ],true)
-        ], true);
-        directory = dir;
+    appWindow.listen('open-directory', (msg: any) => {
+        let root = msg.payload.root.Dir;
+
+        function traverse(curr_dir: any):Directory{
+            let name: string = curr_dir[0];
+            let children: Array<any> = curr_dir[1];
+
+            let output_children: Array<FileSystemNode> = [];
+            for (const child of children) {
+                if ("File" in child) {
+                    output_children.push(new File(child.File, null));
+                } else {
+                    let child_node = traverse(child.Dir);
+                    output_children.push(child_node);
+                }
+            }
+            return new Directory(name, output_children, false);
+        }
+
+        directory = traverse(root);
     });
     
 </script>
