@@ -57,7 +57,7 @@
 
     let directory: Directory | null = null;
 
-    let empty_file = new File("null", "");
+    let empty_file = new File("null", null);
 
     appWindow.listen('open-directory', (_) => {
         let dir = new Directory("/user", [
@@ -70,20 +70,20 @@
                     new File("/user/tuas/gcs/datatypes.go", "content"),
                     new Directory("/user/tuas/gcs/internal", [
                         new File("/user/tuas/gcs/internal/server.go", "content")
-                    ]),
+                    ],true),
                     new File("/user/tuas/gcs/amogus.go", "content"),
-                ]),
+                ],true),
                 new File("/user/tuas/temp.txt", "content"),
                 new Directory("/user/tuas/obc", [
                     new File("/user/tuas/obc/main.py", "content"),
                     new File("/user/tuas/obc/datatypes.py", "content"),
                     new Directory("/user/tuas/obc/internal", [
                         new File("/user/tuas/obc/internal/server.py", "content")
-                    ]),
+                    ],true),
                     new File("/user/tuas/obc/amogus.py", "content"),
-                ])
-            ])
-        ]);
+                ], true)
+            ],true)
+        ], true);
         directory = dir;
     });
     
@@ -94,9 +94,9 @@
     <main>
         <WorkspaceSidebar bind:directory></WorkspaceSidebar> 
         {#if current_file !== null}
-            <TextEditor file={$files[current_file]} editable={true} />
+            <TextEditor file={$files[current_file]} />
         {:else}
-            <TextEditor file={empty_file} editable={false}/>
+            <TextEditor file={empty_file} />
         {/if}
     </main>
     <EditorConsole bind:this={econsole}/>

@@ -2,7 +2,6 @@
     import type { File } from '../defs';
 
     export let file: File;
-    export let editable: boolean;
 
     let num_lines: number = 0;
     let line_nums: String = '';
@@ -14,9 +13,17 @@
         line_nums_elem.scrollTop = editor_elem.scrollTop; 
     }
 
-    $: num_lines = file.content.split('\n').length;
+    function getNumLines() {
+        if (file.content !== null) {
+            return file.content.split('\n').length;
+        } else {
+            return 0;
+        }
+    }
+
+    $: num_lines = getNumLines();
     $: line_nums = Array(num_lines).fill(0).map((_, num) => {
-        if (editable) {
+        if (file.content !== null) {
             return `${num+1}`
         } else {
             return "";
@@ -28,7 +35,7 @@
 
 <div >
     <textarea bind:this={line_nums_elem} class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
-    <textarea bind:this={editor_elem} on:scroll={parseScroll} class="editor" bind:value={file.content} readonly={!editable}></textarea>
+    <textarea bind:this={editor_elem} on:scroll={parseScroll} class="editor" bind:value={file.content} readonly={file.content === null}></textarea>
 </div>
 
 <style >

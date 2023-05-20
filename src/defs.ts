@@ -16,28 +16,42 @@ export class FileSystemNode {
         return false;
     }
 
+    isOpen():boolean {
+        return false;
+    }
+
     subnodes():Array<FileSystemNode> {
         return [];
     }
 }
 
 export class File extends FileSystemNode {
-    content: string;
-    constructor(absPath: string, content: string) {
+    content: string | null;
+    constructor(absPath: string, content: string | null) {
         super(absPath);
         this.content = content;
+    }
+
+    isOpen():boolean {
+        return this.content !== null;
     }
 }
 
 export class Directory extends FileSystemNode {
     content: Array<FileSystemNode>;
-    constructor(absPath: string, content: Array<FileSystemNode>) {
+    open: boolean;
+    constructor(absPath: string, content: Array<FileSystemNode>, open: boolean) {
         super(absPath);
         this.content = content;
+        this.open = open;
     }
 
     isDirectory():boolean {
         return true;
+    }
+
+    isOpen():boolean {
+        return this.open;
     }
 
     subnodes():Array<FileSystemNode> {

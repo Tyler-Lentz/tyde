@@ -1,49 +1,49 @@
 <script lang="ts">
     import type {FileSystemNode} from "../defs"
     import Icon from "./Icon.svelte"
+    import type {Directory} from "../defs"
 
-    export let name: string;
-    export let subnodes: Array<FileSystemNode>;
+    export let directory: Directory | null;
+
     export let depth: string;
     let active: boolean = true;
 
     export function toggle() {
-        active = !active;
+        if (directory !== null) {
+            directory.open = !directory.open;
+        }
     }
 
     let icon_name: string;
-    $: icon_name = active ? "open_dir" : "close_dir";
+    $: icon_name = directory !== null && directory.isOpen() ? "open_dir" : "close_dir";
     $: console.log(icon_name);
 </script>
 
 
 <div>
-    <pre on:click={toggle} class="dir">{depth}<Icon bind:name={icon_name}></Icon>{name}</pre>
-    {#if active}
-        <div >
-            {#each subnodes as subnode}
-                {#if subnode.isDirectory()}
-                    <svelte:self
-                        name={subnode.name} 
-                        subnodes={subnode.subnodes()}
-                        depth={depth+'  '}
-                        >
-                    </svelte:self>
-                {:else}
-                    <div>
-                        <pre class="file">{depth + '  ' + subnode.name}</pre>
-                    </div>
-                {/if}
-            {/each}
-        </div>
+    {#if directory !== null}
+        <pre on:click={toggle} class="dir">{depth}<Icon bind:name={icon_name}></Icon>{directory.name}</pre>
+        {#if directory.isOpen()}
+            <div >
+                {#each directory.subnodes() as subnode}
+                    {#if subnode.isDirectory()}
+                        <svelte:self
+                            bind:directory={subnode}
+                            depth={depth+'  '}
+                            >
+                        </svelte:self>
+                    {:else}
+                        <div>
+                            <pre class="file">{depth + '  ' + subnode.name}</pre>
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        {/if}
     {/if}
 </div>
 
 <style>
-    svg {
-        width: 1rem;
-        height: 1rem;
-    }
     pre.dir {
         color: var(--text-highlight-color);
     }

@@ -10,15 +10,13 @@
 <div class="second">
     {#if directory !== null}
         <WorkspaceDirectory
-            name={directory.name} 
-            subnodes={directory.subnodes()}
+            bind:directory
             depth={''}
             >
         </WorkspaceDirectory>
     {:else}
         <WorkspaceDirectory 
-            name="" 
-            subnodes={[]}
+            directory={null}
             depth={''}
             >
         </WorkspaceDirectory>

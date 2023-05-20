@@ -45,6 +45,10 @@
 {/if}
 
 <style>
+    svg {
+        translate: 0px .25rem;
+    }
+
     .close_dir {
         transform: rotate(270deg);
     }
