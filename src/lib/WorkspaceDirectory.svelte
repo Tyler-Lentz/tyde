@@ -3,66 +3,51 @@
 
     export let name: String;
     export let subnodes: Array<FileSystemNode>;
+    export let depth: string;
 </script>
 
 <div>
-    <p class="dir">{name}</p>
-    <ol>
+    <pre class="dir">{depth + '>' + name}</pre>
+    <div>
         {#each subnodes as subnode}
             {#if subnode.isDirectory()}
                 <svelte:self
                     name={subnode.name} 
                     subnodes={subnode.subnodes()}
+                    depth={depth+'  '}
                     >
                 </svelte:self>
             {:else}
                 <div>
-                    <p class="file">{subnode.name}</p>
+                    <pre class="file">{depth + '  ' + subnode.name}</pre>
                 </div>
             {/if}
         {/each}
-    </ol>
+    </div>
 </div>
 
 <style>
-    p.dir::before {
-        content: ">";
-    }
-
-    p.dir {
+    pre.dir {
         color: var(--text-highlight-color);
     }
 
-    p.file {
+    pre.file {
         color: var(--text-default-color);
     }
 
-    p {
+    pre {
         margin: 0;
-        margin-bottom: 5px;
-        -width: max-content;
+        padding: 5px;
         width: 100%;
-        outline: 1px solid red;
     }
 
-    p:hover {
+    pre:hover {
         background-color: var(--medium-bg-color);
     }
 
-    div, ol {
+    div {
         display: flex;
         flex-direction: column;
-    }
-
-    ol {
-        list-style-type: none;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        margin-top: 0;
-        outline: 1px solid blue;
-    }
-
-    div {
         width: 100%;
     }
 

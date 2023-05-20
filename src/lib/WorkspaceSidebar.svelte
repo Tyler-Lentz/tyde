@@ -10,12 +10,14 @@
         <WorkspaceDirectory
             name={directory.name} 
             subnodes={directory.subnodes()}
+            depth={''}
             >
         </WorkspaceDirectory>
     {:else}
         <WorkspaceDirectory 
             name="" 
             subnodes={[]}
+            depth={''}
             >
         </WorkspaceDirectory>
     {/if}
@@ -29,8 +31,8 @@
         background-color: var(--dark-bg-color);
         height: calc(90vh + 3px);
         width: max-content;
-        overflow: scroll;
         border-bottom: none;
         border-top: none;
+        padding-right: 10px;
     }
 </style>
