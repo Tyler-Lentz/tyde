@@ -1,8 +1,8 @@
 export class FileSystemNode {
-    name: String;
-    absPath: String;
+    name: string;
+    absPath: string;
 
-    constructor(absPath: String) {
+    constructor(absPath: string) {
         if (absPath == "") {
             this.name = "<unnamed>"
         } else {
@@ -22,8 +22,8 @@ export class FileSystemNode {
 }
 
 export class File extends FileSystemNode {
-    content: String;
-    constructor(absPath: String, content: String) {
+    content: string;
+    constructor(absPath: string, content: string) {
         super(absPath);
         this.content = content;
     }
@@ -31,7 +31,7 @@ export class File extends FileSystemNode {
 
 export class Directory extends FileSystemNode {
     content: Array<FileSystemNode>;
-    constructor(absPath: String, content: Array<FileSystemNode>) {
+    constructor(absPath: string, content: Array<FileSystemNode>) {
         super(absPath);
         this.content = content;
     }

@@ -56,6 +56,8 @@
         overflow: hidden;
         text-align: right;
         min-width: 32px;
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     textarea.line_nums::selection {

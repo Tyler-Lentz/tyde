@@ -30,6 +30,8 @@
         border-bottom: 1px solid var(--dark-highlight-color);
         width: 100vw;
         min-height: 1.3rem;
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     li {
