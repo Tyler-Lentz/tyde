@@ -6,7 +6,8 @@ fn build_menu() -> Menu {
     let open = CustomMenuItem::new("open", "Open");
     let save = CustomMenuItem::new("save", "Save");
     let new = CustomMenuItem::new("new", "New");
-    let file_menu = Submenu::new("File", Menu::new().add_item(open).add_item(save).add_item(new));
+    let directory = CustomMenuItem::new("open-directory", "Open Directory");
+    let file_menu = Submenu::new("File", Menu::new().add_item(new).add_item(open).add_item(directory).add_item(save));
     Menu::new().add_submenu(file_menu)
 }
 
@@ -45,6 +46,12 @@ fn handle_menu_events(event: WindowMenuEvent) {
                 eprintln!("{}", e);
             }
         },
+        "open-directory" => {
+            let res = event.window().emit("open-directory", ());
+            if let Err(e) = res {
+                eprintln!("{}", e);
+            }
+        }
         _ => {},
     }
 }

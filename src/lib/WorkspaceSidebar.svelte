@@ -1,17 +1,24 @@
 <script lang="ts">
     import type {Directory} from "../defs"
     import WorkspaceDirectory from "./WorkspaceDirectory.svelte";
-    import WorkspaceFile from "./WorkspaceFile.svelte";
 
-    export let directory: Directory;
+    export let directory: Directory | null;
 </script>
 
-<div>
-    <WorkspaceDirectory
-        name={directory.name} 
-        subnodes={directory.subnodes()}
-        indent={0}>
-    </WorkspaceDirectory>
+<div >
+    {#if directory !== null}
+        <WorkspaceDirectory
+            name={directory.name} 
+            subnodes={directory.subnodes()}
+            >
+        </WorkspaceDirectory>
+    {:else}
+        <WorkspaceDirectory 
+            name="" 
+            subnodes={[]}
+            >
+        </WorkspaceDirectory>
+    {/if}
 </div>
 
 <style>
@@ -21,11 +28,9 @@
         border: 1px solid var(--dark-highlight-color);
         background-color: var(--dark-bg-color);
         height: calc(90vh + 3px);
-        width: 16vw;
-        max-width: 16vw;
-        overflow-x: scroll;
+        width: max-content;
+        overflow: scroll;
         border-bottom: none;
         border-top: none;
-        padding-right: 10px;
     }
 </style>

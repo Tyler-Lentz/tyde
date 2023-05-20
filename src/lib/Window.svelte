@@ -54,52 +54,55 @@
         });
     });
 
-    let dir = new Directory("/user", [
-        new Directory("/user/tuas", [
-            new Directory("/user/tuas/gcs", [
-                new File("/user/tuas/gcs/main.go", "content"),
-                new File("/user/tuas/gcs/datatypes.go", "content"),
-                new Directory("/user/tuas/gcs/internal", [
-                    new File("/user/tuas/gcs/internal/server.go", "content")
+
+    let directory: Directory | null = null;
+
+    let empty_file = new File("null", "");
+
+    appWindow.listen('open-directory', (_) => {
+        let dir = new Directory("/user", [
+            new File("/user/test", "content"),
+            new File("/user/test2", "content"),
+            new File("/user/test3", "content"),
+            new Directory("/user/tuas", [
+                new Directory("/user/tuas/gcs", [
+                    new File("/user/tuas/gcs/main.go", "content"),
+                    new File("/user/tuas/gcs/datatypes.go", "content"),
+                    new Directory("/user/tuas/gcs/internal", [
+                        new File("/user/tuas/gcs/internal/server.go", "content")
+                    ]),
+                    new File("/user/tuas/gcs/amogus.go", "content"),
                 ]),
-                new File("/user/tuas/gcs/amogus.go", "content"),
-            ]),
-            new File("/user/tuas/temp.txt", "content"),
-            new Directory("/user/tuas/obc", [
-                new File("/user/tuas/obc/main.py", "content"),
-                new File("/user/tuas/obc/datatypes.py", "content"),
-                new Directory("/user/tuas/obc/internal", [
-                    new File("/user/tuas/obc/internal/server.py", "content")
-                ]),
-                new File("/user/tuas/obc/amogus.py", "content"),
+                new File("/user/tuas/temp.txt", "content"),
+                new Directory("/user/tuas/obc", [
+                    new File("/user/tuas/obc/main.py", "content"),
+                    new File("/user/tuas/obc/datatypes.py", "content"),
+                    new Directory("/user/tuas/obc/internal", [
+                        new File("/user/tuas/obc/internal/server.py", "content")
+                    ]),
+                    new File("/user/tuas/obc/amogus.py", "content"),
+                ])
             ])
-        ])
-    ]);
+        ]);
+        directory = dir;
+    });
+    
 </script>
 
 <div>
     <Topbar bind:current_file/> 
     <main>
-        <WorkspaceSidebar directory={dir}></WorkspaceSidebar> 
+        <WorkspaceSidebar bind:directory></WorkspaceSidebar> 
         {#if current_file !== null}
-            <TextEditor file={$files[current_file]} />
+            <TextEditor file={$files[current_file]} editable={true} />
+        {:else}
+            <TextEditor file={empty_file} editable={false}/>
         {/if}
     </main>
     <EditorConsole bind:this={econsole}/>
 </div>
 
 <style>
-    :global(:root) {
-        --text-default-color: rgb(204,204,198);
-        --text-highlight-color: rgb(115, 170, 195);
-        --darkest-bg-color: rgb(30,30,30);
-        --dark-bg-color: rgb(37,37,38);
-        --medium-bg-color: rgb(51,51,51);
-        --highlight-color: rgb(179,143,80);
-        --dark-highlight-color: rgb(99,112,112);
-        --warning-color: rgb(180, 58, 58);
-        --font-size: 12pt;
-    }
     div {
         background-color: var(--darkest-bg-color);
         display: flex;
