@@ -13,20 +13,13 @@
         line_nums_elem.scrollTop = editor_elem.scrollTop; 
     }
 
-    function getNumLines() {
-        if (file.content !== null) {
-            return file.content.split('\n').length;
-        } else {
-            return 0;
-        }
-    }
-
-    $: num_lines = getNumLines();
+    $: fcontent = file.content !== null ? file.content : "";
+    $: num_lines = fcontent.split('\n').length;
     $: line_nums = Array(num_lines).fill(0).map((_, num) => {
         if (file.content !== null) {
-            return `${num+1}`
+            return `${num+1}`;
         } else {
-            return "";
+            return '';
         }
     }).join('\n');
     $: max_line_size = String(num_lines).length * 16;

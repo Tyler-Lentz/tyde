@@ -19,7 +19,7 @@ fn handle_menu_events(event: WindowMenuEvent) {
                 .pick_file(move |file_path| {
                     let window = event.window();
                     if let Some(file_path) = file_path {
-                        match filesystem::open_file(file_path) {
+                        match filesystem::open_file(file_path.to_string_lossy().to_string()) {
                             Ok(message) => {
                                 let res = window.emit("open-file", message);
                                 if let Err(e) = res {

@@ -15,6 +15,13 @@
     let icon_name: string;
     $: icon_name = directory !== null && directory.isOpen() ? "open_dir" : "close_dir";
     $: console.log(icon_name);
+
+    function openFile(absPath: string) {
+        // TODO: open file
+        // invoke('save_file', { fpath: file.absPath, content: file.content }).then((_) => {
+        //     econsole.add(`Saved ${file.absPath}`)
+        // });
+    }
 </script>
 
 

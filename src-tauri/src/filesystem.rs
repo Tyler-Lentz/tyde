@@ -18,10 +18,11 @@ pub struct DirMessage {
     pub root: Node,
 }
 
-pub fn open_file(fname: PathBuf) -> Result<FileMessage, String> {
+#[tauri::command]
+pub fn open_file(fname: String) -> Result<FileMessage, String> {
     Ok(FileMessage {
         content: fs::read_to_string(fname.clone()).map_err(|e| e.to_string())?,
-        name: fname.display().to_string()
+        name: fname,
     })
 }
 
