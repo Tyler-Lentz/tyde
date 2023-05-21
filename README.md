@@ -10,15 +10,14 @@ A custom IDE developed mainly for fun and to learn Rust and Svelte through Tauri
 ## TODO
 
 ### Short Term
-- save files
-- close file that has been opened
+- directory view updates in real time if file system changes
+- save as option
+- in-app terminal
 
 ### Long Term
 - navigation shortcuts
 - Vim keybindings
-- workspace support
 - configurable themes
-- in-app terminal
 - syntax highlighting
 - code autocomplete
 - in app stack overflow search
