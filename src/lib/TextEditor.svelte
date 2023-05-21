@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type { File } from '../defs';
+    import type {TFile} from "../file"
 
-    export let file: File;
+    export let file: TFile;
 
     let num_lines: number = 0;
     let line_nums: String = '';

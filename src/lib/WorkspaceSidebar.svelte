@@ -1,26 +1,18 @@
 <script lang="ts">
-    import type {Directory} from "../defs";
+    import type {TDir} from "../file";
     import WorkspaceDirectory from "./WorkspaceDirectory.svelte";
 
-    export let directory: Directory | null;
+    export let directory: TDir | null;
 </script>
 
 
 <div class="first">
 <div class="second">
-    {#if directory !== null}
-        <WorkspaceDirectory
-            bind:directory
-            depth={''}
-            >
-        </WorkspaceDirectory>
-    {:else}
-        <WorkspaceDirectory 
-            directory={null}
-            depth={''}
-            >
-        </WorkspaceDirectory>
-    {/if}
+    <WorkspaceDirectory
+        bind:directory
+        depth={''}
+        >
+    </WorkspaceDirectory>
 </div>
 </div>
 

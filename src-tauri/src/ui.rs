@@ -75,7 +75,7 @@ pub fn show() {
     tauri::Builder::default()
         .menu(build_menu())
         .on_menu_event(handle_menu_events)
-        .invoke_handler(tauri::generate_handler![filesystem::save_file])
+        .invoke_handler(tauri::generate_handler![filesystem::save_file, filesystem::open_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

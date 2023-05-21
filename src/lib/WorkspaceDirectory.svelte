@@ -1,26 +1,35 @@
 <script lang="ts">
     import Icon from "./Icon.svelte"
-    import type {Directory} from "../defs"
+    import type {TDir, TFile, FNode} from "../file"
+    import {files, econsole} from "../stores"
+    import { invoke } from '@tauri-apps/api/tauri'
 
-    export let directory: Directory | null;
+    export let directory: TDir | null;
 
     export let depth: string;
 
     export function toggle() {
         if (directory !== null) {
-            directory.open = !directory.open;
+            directory.toggleOpen();
+            directory = directory;
         }
     }
 
     let icon_name: string;
     $: icon_name = directory !== null && directory.isOpen() ? "open_dir" : "close_dir";
-    $: console.log(icon_name);
 
-    function openFile(absPath: string) {
-        // TODO: open file
-        // invoke('save_file', { fpath: file.absPath, content: file.content }).then((_) => {
-        //     econsole.add(`Saved ${file.absPath}`)
-        // });
+    function openFile(fnode: TFile | undefined) {
+        if (fnode === undefined) {
+            return;
+        }
+        invoke('open_file', { fname: fnode.path }).then((file: any) => {
+            econsole.set(`Opened ${file.path}`);
+            files.update((files) => {
+                fnode.content = file.content;
+                files.push(fnode);
+                return files;
+            });
+        });
     }
 </script>
 
@@ -30,8 +39,8 @@
         <pre on:click={toggle} class="dir">{depth}<Icon bind:name={icon_name}></Icon>{directory.name}</pre>
         {#if directory.isOpen()}
             <div >
-                {#each directory.subnodes() as subnode}
-                    {#if subnode.isDirectory()}
+                {#each directory.contents as subnode}
+                    {#if subnode.isDir()}
                         <svelte:self
                             bind:directory={subnode}
                             depth={depth+'  '}
@@ -39,7 +48,7 @@
                         </svelte:self>
                     {:else}
                         <div>
-                            <pre class="file">{depth + '  ' + subnode.name}</pre>
+                            <pre on:click={() => openFile(subnode.file)} class="file">{depth + '  ' + subnode.file?.name}</pre>
                         </div>
                     {/if}
                 {/each}

@@ -1,37 +1,56 @@
 use std::{fs::{self}, path::{PathBuf, Path}};
 use std::io;
 
-#[derive(serde::Serialize, Clone)]
-pub struct FileMessage {
-    pub content: String,
-    pub name: String,
-}
-
 #[derive(serde::Serialize, Clone, Ord, PartialOrd, PartialEq, Eq)]
-pub enum Node {
-    Dir(String, Vec<Node>),
-    File(String),
+pub enum FNode {
+    Dir{
+        path: String, 
+        contents: Vec<FNode>
+    },
+    File{
+        path: String,
+        content: Option<String>,
+    }
 }
 
-#[derive(serde::Serialize, Clone)]
-pub struct DirMessage {
-    pub root: Node,
+impl FNode {
+    fn from_dir(path: String, contents: Vec<FNode>) -> Self {
+        Self::Dir {
+            path, contents
+        }
+    }
+
+    fn from_unloaded_file(path: String) -> Self {
+        Self::File {
+            path,
+            content: None,
+        }
+    }
+
+    fn from_loaded_file(path: String, content: String) -> Self {
+        Self::File {
+            path, 
+            content: Some(content)
+        }
+    }
 }
 
 #[tauri::command]
-pub fn open_file(fname: String) -> Result<FileMessage, String> {
-    Ok(FileMessage {
-        content: fs::read_to_string(fname.clone()).map_err(|e| e.to_string())?,
-        name: fname,
-    })
+pub fn open_file(path: String) -> Result<FNode, String> {
+    Ok(
+        FNode::from_loaded_file(
+            path.clone(),
+            fs::read_to_string(path).map_err(|e| e.to_string())?
+        )
+    )
 }
 
-pub fn open_dir(dir_name: PathBuf) -> Result<DirMessage, String> {
-    let root = visit_dirs(dir_name.as_path()).map_err(|e| e.to_string())?;
-    Ok(DirMessage{root})
+pub fn open_dir(path: PathBuf) -> Result<FNode, String> {
+    let root = visit_dirs(path.as_path()).map_err(|e| e.to_string())?;
+    Ok(root)
 }
 
-fn visit_dirs(dir: &Path) -> io::Result<Node> {
+fn visit_dirs(dir: &Path) -> io::Result<FNode> {
     let name = dir.to_string_lossy().to_string();
     if dir.is_dir() {
         let mut children = vec![];
@@ -42,12 +61,12 @@ fn visit_dirs(dir: &Path) -> io::Result<Node> {
             if path.is_dir() {
                 children.push(visit_dirs(&path)?);
             } else {
-                children.push(Node::File(curr_name))
+                children.push(FNode::from_unloaded_file(curr_name));
             }
         }
-        Ok(Node::Dir(name, children))
+        Ok(FNode::from_dir(name, children))
     } else {
-        Ok(Node::File(name))
+        Ok(FNode::from_unloaded_file(name))
     }
 }
 

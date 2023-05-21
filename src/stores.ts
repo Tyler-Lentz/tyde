@@ -1,5 +1,7 @@
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { File } from './defs';
+import type { TFile } from './file'
 
-export const files: Writable<Array<File>> = writable([]);
+export const files: Writable<Array<TFile>> = writable([]);
+
+export const econsole: Writable<string> = writable("");

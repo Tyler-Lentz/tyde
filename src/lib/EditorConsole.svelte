@@ -1,7 +1,9 @@
 <script lang="ts">
     import ScreenDialog from './ScreenDialog.svelte';
-    let dialog: HTMLDialogElement;
+    import {econsole} from '../stores';
+	import { onDestroy } from 'svelte';
 
+    let dialog: HTMLDialogElement;
     let history: Array<String> = [];
 
     export function add(message: String) {
@@ -12,6 +14,13 @@
     export function open() {
         dialog.showModal()
     }
+
+    let unsub = econsole.subscribe((msg) => {
+        add(msg);
+    });
+    onDestroy(() => {
+        unsub();
+    });
 </script>
 
 <pre on:click={open}>{history.at(-1) || ""}</pre>

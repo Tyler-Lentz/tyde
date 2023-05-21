@@ -4,8 +4,8 @@
     import Topbar from './Topbar.svelte';
     import TextEditor from './TextEditor.svelte';
     import EditorConsole from './EditorConsole.svelte';
-    import { Directory, File } from '../defs';
-    import type {FileSystemNode} from '../defs'
+    import { TDir, TFile } from '../file';
+    import {FNode} from '../file'
     import { files } from '../stores';
 	import WorkspaceSidebar from './WorkspaceSidebar.svelte';
 
@@ -15,18 +15,18 @@
 
     appWindow.listen('open-file', (event: any) => {
         files.update((files) => {
-            let file = new File(event.payload.name, event.payload.content);
+            let file = new TFile(event.payload.name, event.payload.content);
 
             for (const f of files) {
-                if (f.absPath === file.absPath) {
-                    econsole.add(`File ${file.absPath} already open`);
+                if (f.path === file.path) {
+                    econsole.add(`File ${file.path} already open`);
                     return files;
                 }
             }
 
             files.push(file);
             current_file = files.length - 1;
-            econsole.add(`Opened ${event.payload.name}`);
+            econsole.add(`Opened ${file.path}`);
             return files;
         });
     });
@@ -34,20 +34,20 @@
     appWindow.listen('save-file', (_) => {
         if (current_file !== null) {
             let file = $files[current_file];
-            if (file.absPath === "") {
+            if (file.path === "") {
                 econsole.add(`Cannot save unnamed file`);
                 return;
             }
 
-            invoke('save_file', { fpath: file.absPath, content: file.content }).then((_) => {
-                econsole.add(`Saved ${file.absPath}`)
+            invoke('save_file', { fpath: file.path, content: file.content }).then((_) => {
+                econsole.add(`Saved ${file.path}`)
             });
         }
     });
 
     appWindow.listen('new-file', (_) => {
         files.update((files) => {
-            let file = new File("", "");
+            let file = new TFile("", "");
             files.push(file);
             current_file = files.length - 1;
             econsole.add(`Created new file`);
@@ -56,32 +56,19 @@
     });
 
 
-    let directory: Directory | null = null;
+    let directory: TDir | null = null;
 
-    let empty_file = new File("null", null);
+    let empty_file = new TFile("null", null);
 
     appWindow.listen('open-directory', (msg: any) => {
-        let root = msg.payload.root.Dir;
-
-        function traverse(curr_dir: any):Directory{
-            let name: string = curr_dir[0];
-            let children: Array<any> = curr_dir[1];
-
-            let output_children: Array<FileSystemNode> = [];
-            for (const child of children) {
-                if ("File" in child) {
-                    output_children.push(new File(child.File, null));
-                } else {
-                    let child_node = traverse(child.Dir);
-                    output_children.push(child_node);
-                }
-            }
-            return new Directory(name, output_children, false);
+        let root = new FNode(msg.payload);
+        if (root.dir === undefined) {
+            econsole.add("Error opening directory: no root found.");
+            return;
         }
-
-        directory = traverse(root);
+        directory = root.dir;
     });
-    
+
 </script>
 
 <div>
