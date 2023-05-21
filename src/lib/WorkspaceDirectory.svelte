@@ -3,6 +3,7 @@
     import type {TDir, TFile, FNode} from "../file"
     import {econsole, opened_files, curr_file} from "../stores"
     import { invoke } from '@tauri-apps/api/tauri'
+	import { onDestroy } from "svelte";
 
     export let directory: TDir | null;
 
@@ -47,6 +48,13 @@
             });
         });
     }
+
+    let unsub = curr_file.subscribe((_) => {
+        directory = directory;
+    });
+    onDestroy(() => {
+        unsub();
+    })
 </script>
 
 
@@ -70,6 +78,7 @@
                                     class="file"
                                     data-opened={$opened_files.includes(subnode.file)}
                                     data-current={subnode.file === $curr_file}
+                                    data-mutated={subnode.file.mutated}
                                     >{depth + '  ' + subnode.file?.name}</pre>
                             {/if}
                         </div>
@@ -102,6 +111,14 @@
 
     pre[data-opened="true"]::after {
         content: "*";
+    }
+
+    pre[data-mutated="true"]::after {
+        color: var(--warning-color);
+    }
+
+    pre[data-mutated="false"]::after {
+        color: var(--text-highlight-color);
     }
 
     div {

@@ -31,27 +31,29 @@
     });
 
     appWindow.listen('save-file', (_) => {
-        // if (current_file !== null) {
-        //     let file = $files[current_file];
-        //     if (file.path === "") {
-        //         econsole.add(`Cannot save unnamed file`);
-        //         return;
-        //     }
+        if ($curr_file !== null) {
+            if ($curr_file.path === "") {
+                econsole.add(`Cannot save unnamed file`);
+                return;
+            }
 
-        //     invoke('save_file', { fpath: file.path, content: file.content }).then((_) => {
-        //         econsole.add(`Saved ${file.path}`)
-        //     });
-        // }
+            invoke('save_file', { fpath: $curr_file.path, content: $curr_file.content }).then((path) => {
+                econsole.add(`Saved ${path}`)
+                if ($curr_file !== null) {
+                    $curr_file.mutated = false;
+                }
+            });
+        }
     });
 
     appWindow.listen('new-file', (_) => {
-        // files.update((files) => {
-        //     let file = new TFile("", "");
-        //     files.push(file);
-        //     current_file = files.length - 1;
-        //     econsole.add(`Created new file`);
-        //     return files;
-        // });
+        opened_files.update((files) => {
+            let file = new TFile("", "");
+            files.push(file);
+            curr_file.set(file);
+            econsole.add(`Created new file`);
+            return files;
+        });
     });
 
     let empty_file = new TFile("null", null);
@@ -88,12 +90,8 @@
 <div>
     <Topbar /> 
     <main>
-        <WorkspaceSidebar></WorkspaceSidebar> 
-        {#if $curr_file !== null}
-            <TextEditor bind:current_file={$curr_file} />
-        {:else}
-            <TextEditor current_file={empty_file} />
-        {/if}
+        <WorkspaceSidebar />
+        <TextEditor />
     </main>
     <EditorConsole bind:this={econsole}/>
 </div>

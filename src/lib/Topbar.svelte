@@ -1,6 +1,7 @@
 <script lang="ts">
     import { opened_files, curr_file } from '../stores';
     import type { TFile } from '../file';
+	import { onDestroy } from 'svelte';
 
     function handleClick(event: Event) {
         if (event.target instanceof HTMLLIElement) {
@@ -8,11 +9,18 @@
             curr_file.set(event.target.dataset.selected === 'true' ? null : $opened_files.find(file => file.path === path) || null);
         }
     }
+
+    let unsub = curr_file.subscribe((_) => {
+        opened_files.update(a => a);
+    });
+    onDestroy(() => {
+        unsub();
+    })
 </script>
 
 <ol>
     {#each $opened_files as file, i}
-        <li on:click={handleClick} data-path={file.path} data-selected={$curr_file === file}>{file.name}</li>
+        <li on:click={handleClick} data-mutated={file.mutated} data-path={file.path} data-selected={$curr_file === file}>{file.name}</li>
     {/each}
 </ol>
 
@@ -41,11 +49,15 @@
         min-height: 1rem;
         width: 10vw;
         white-space: nowrap;
-        color: var(--text-highlight-color);
+        color: var(--text-default-color);
         padding: 0.125rem;
     }
 
     li:hover, li:focus, li[data-selected="true"] {
-        background-color: var(--dark-highlight-color);
+        background-color: var(--medium-bg-color);
+    }
+
+    li[data-mutated="true"] {
+        color: var(--warning-color);
     }
 </style>

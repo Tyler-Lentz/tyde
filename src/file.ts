@@ -91,11 +91,13 @@ export class TFile {
     path: string;
     name: string;
     content: string | null;
+    mutated: boolean;
     constructor(path: string, content: string | null) {
         console.log("making file", path, content);
         this.path = path;
         this.name = path.split('/').at(-1) || path;
         this.content = content;
+        this.mutated = false;
     }
 
     isOpen():boolean {

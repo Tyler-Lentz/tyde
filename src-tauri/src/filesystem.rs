@@ -72,7 +72,7 @@ fn visit_dirs(dir: &Path) -> io::Result<FNode> {
 
 
 #[tauri::command]
-pub fn save_file(fpath: String, content: String) -> Result<(), String> {
-    fs::write(fpath, content).map_err(|e| e.to_string())?;
-    Ok(())
+pub fn save_file(fpath: String, content: String) -> Result<String, String> {
+    fs::write(fpath.clone(), content).map_err(|e| e.to_string())?;
+    Ok(fpath)
 }
