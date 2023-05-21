@@ -6,79 +6,94 @@
     import EditorConsole from './EditorConsole.svelte';
     import { TDir, TFile } from '../file';
     import {FNode} from '../file'
-    import { files } from '../stores';
+    import { root, opened_files } from '../stores';
 	import WorkspaceSidebar from './WorkspaceSidebar.svelte';
+	import { onDestroy } from 'svelte';
 
     let econsole: EditorConsole;
 
-    let current_file: number | null = null;
-
     appWindow.listen('open-file', (event: any) => {
-        files.update((files) => {
-            let file = new TFile(event.payload.name, event.payload.content);
+        // files.update((files) => {
+        //     let file = new TFile(event.payload.name, event.payload.content);
 
-            for (const f of files) {
-                if (f.path === file.path) {
-                    econsole.add(`File ${file.path} already open`);
-                    return files;
-                }
-            }
+        //     for (const f of files) {
+        //         if (f.path === file.path) {
+        //             econsole.add(`File ${file.path} already open`);
+        //             return files;
+        //         }
+        //     }
 
-            files.push(file);
-            current_file = files.length - 1;
-            econsole.add(`Opened ${file.path}`);
-            return files;
-        });
+        //     files.push(file);
+        //     current_file = files.length - 1;
+        //     econsole.add(`Opened ${file.path}`);
+        //     return files;
+        // });
     });
 
     appWindow.listen('save-file', (_) => {
-        if (current_file !== null) {
-            let file = $files[current_file];
-            if (file.path === "") {
-                econsole.add(`Cannot save unnamed file`);
-                return;
-            }
+        // if (current_file !== null) {
+        //     let file = $files[current_file];
+        //     if (file.path === "") {
+        //         econsole.add(`Cannot save unnamed file`);
+        //         return;
+        //     }
 
-            invoke('save_file', { fpath: file.path, content: file.content }).then((_) => {
-                econsole.add(`Saved ${file.path}`)
-            });
-        }
+        //     invoke('save_file', { fpath: file.path, content: file.content }).then((_) => {
+        //         econsole.add(`Saved ${file.path}`)
+        //     });
+        // }
     });
 
     appWindow.listen('new-file', (_) => {
-        files.update((files) => {
-            let file = new TFile("", "");
-            files.push(file);
-            current_file = files.length - 1;
-            econsole.add(`Created new file`);
-            return files;
-        });
+        // files.update((files) => {
+        //     let file = new TFile("", "");
+        //     files.push(file);
+        //     current_file = files.length - 1;
+        //     econsole.add(`Created new file`);
+        //     return files;
+        // });
     });
-
-
-    let directory: TDir | null = null;
 
     let empty_file = new TFile("null", null);
 
     appWindow.listen('open-directory', (msg: any) => {
-        let root = new FNode(msg.payload);
-        if (root.dir === undefined) {
+        let top = new FNode(msg.payload, undefined);
+        if (top.dir === undefined) {
             econsole.add("Error opening directory: no root found.");
             return;
         }
-        directory = root.dir;
+        
+        root.set(top.dir);
     });
+
+    let current_file: TFile | null = null;
+    let old_num_files: number = 0;
+
+    let unsub = opened_files.subscribe((ofiles) => {
+        if (ofiles.length > old_num_files) {
+            // New opened file at end of list
+            current_file = ofiles.at(-1) || null;
+        } else if (ofiles.length < old_num_files) {
+            if (current_file !== null && !ofiles.includes(current_file)) {
+                // current file was closed
+                current_file = null;
+            }
+        }
+
+        old_num_files = ofiles.length;
+    });
+    onDestroy(() => {unsub();});
 
 </script>
 
 <div>
     <Topbar bind:current_file/> 
     <main>
-        <WorkspaceSidebar bind:directory></WorkspaceSidebar> 
+        <WorkspaceSidebar></WorkspaceSidebar> 
         {#if current_file !== null}
-            <TextEditor file={$files[current_file]} />
+            <TextEditor bind:current_file />
         {:else}
-            <TextEditor file={empty_file} />
+            <TextEditor current_file={empty_file} />
         {/if}
     </main>
     <EditorConsole bind:this={econsole}/>

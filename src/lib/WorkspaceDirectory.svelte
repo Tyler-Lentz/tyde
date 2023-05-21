@@ -1,7 +1,7 @@
 <script lang="ts">
     import Icon from "./Icon.svelte"
     import type {TDir, TFile, FNode} from "../file"
-    import {files, econsole} from "../stores"
+    import {econsole, opened_files} from "../stores"
     import { invoke } from '@tauri-apps/api/tauri'
 
     export let directory: TDir | null;
@@ -18,16 +18,25 @@
     let icon_name: string;
     $: icon_name = directory !== null && directory.isOpen() ? "open_dir" : "close_dir";
 
-    function openFile(fnode: TFile | undefined) {
-        if (fnode === undefined) {
+    function openFile(file: TFile | undefined) {
+        if (file === undefined) {
             return;
         }
-        invoke('open_file', { fname: fnode.path }).then((file: any) => {
-            econsole.set(`Opened ${file.path}`);
-            files.update((files) => {
-                fnode.content = file.content;
-                files.push(fnode);
-                return files;
+            
+        if ($opened_files.find(f => f.path === file.path)) {
+            // file is already opened so dont reopen it
+            return
+        }
+
+        invoke('open_file', { path: file.path }).then((resp: any) => {
+
+            econsole.set(`Opened ${resp.File.path}`);
+            file.content = resp.File.content;
+
+            opened_files.update((ofiles: Array<TFile>) => {
+                ofiles.push(file);
+                econsole.set(`Opened ${file.path}`);
+                return ofiles;
             });
         });
     }
@@ -42,7 +51,7 @@
                 {#each directory.contents as subnode}
                     {#if subnode.isDir()}
                         <svelte:self
-                            bind:directory={subnode}
+                            bind:directory={subnode.dir}
                             depth={depth+'  '}
                             >
                         </svelte:self>

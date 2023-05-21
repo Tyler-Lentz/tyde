@@ -2,21 +2,34 @@ export class FNode {
     dir: TDir | undefined;
     file: TFile | undefined;
 
-    constructor(obj: any) {
+    #searchmap: Map<String, TFile>;
+
+    constructor(obj: any, map: Map<String, TFile> | undefined) {
         this.dir = undefined;
         this.file = undefined;
+
+        if (map === undefined) {
+            this.#searchmap = new Map();
+        } else {
+            this.#searchmap = map;
+        }
 
         if ("Dir" in obj) {
             let contents: Array<FNode> = [];
 
             for (const fnode of obj.Dir.contents) {
-                contents.push(new FNode(fnode));
+                contents.push(new FNode(fnode, this.#searchmap));
             }
 
             this.dir = new TDir(obj.Dir.path, contents);
         } else if ("File" in obj) {
             this.file = new TFile(obj.File.path, obj.File.content);
+            this.#searchmap.set(this.file.path, this.file);
         }
+    }
+
+    search(path: string):TFile|undefined {
+        return this.#searchmap.get(path);
     }
 
     getPath():string {

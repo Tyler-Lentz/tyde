@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {TFile} from "../file"
 
-    export let file: TFile;
+    export let current_file: TFile;
 
     let num_lines: number = 0;
     let line_nums: String = '';
@@ -13,10 +13,10 @@
         line_nums_elem.scrollTop = editor_elem.scrollTop; 
     }
 
-    $: fcontent = file.content !== null ? file.content : "";
+    $: fcontent = current_file.content !== null ? current_file.content : "";
     $: num_lines = fcontent.split('\n').length;
     $: line_nums = Array(num_lines).fill(0).map((_, num) => {
-        if (file.content !== null) {
+        if (current_file.content !== null) {
             return `${num+1}`;
         } else {
             return '';
@@ -28,7 +28,7 @@
 
 <div >
     <textarea bind:this={line_nums_elem} class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
-    <textarea bind:this={editor_elem} on:scroll={parseScroll} class="editor" bind:value={file.content} readonly={file.content === null}></textarea>
+    <textarea bind:this={editor_elem} on:scroll={parseScroll} class="editor" bind:value={current_file.content} readonly={current_file.content === null}></textarea>
 </div>
 
 <style >

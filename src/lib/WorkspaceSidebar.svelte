@@ -1,8 +1,15 @@
 <script lang="ts">
     import type {TDir} from "../file";
     import WorkspaceDirectory from "./WorkspaceDirectory.svelte";
+    import {root} from "../stores";
+	import { onDestroy } from "svelte";
 
-    export let directory: TDir | null;
+    let directory: TDir | null;
+    let unsubscribe = root.subscribe((val) => {
+        directory = val; 
+    });
+    onDestroy(() => unsubscribe());
+
 </script>
 
 
