@@ -1,20 +1,18 @@
 <script lang="ts">
-    import { opened_files } from '../stores';
+    import { opened_files, curr_file } from '../stores';
     import type { TFile } from '../file';
-
-    export let current_file: TFile | null;
 
     function handleClick(event: Event) {
         if (event.target instanceof HTMLLIElement) {
             let path = event.target.dataset.path;
-            current_file = event.target.dataset.selected === 'true' ? null : $opened_files.find(file => file.path === path) || null;
+            curr_file.set(event.target.dataset.selected === 'true' ? null : $opened_files.find(file => file.path === path) || null);
         }
     }
 </script>
 
 <ol>
     {#each $opened_files as file, i}
-        <li on:click={handleClick} data-path={file.path} data-selected={current_file === file}>{file.name}</li>
+        <li on:click={handleClick} data-path={file.path} data-selected={$curr_file === file}>{file.name}</li>
     {/each}
 </ol>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import Icon from "./Icon.svelte"
     import type {TDir, TFile, FNode} from "../file"
-    import {econsole, opened_files} from "../stores"
+    import {econsole, opened_files, curr_file} from "../stores"
     import { invoke } from '@tauri-apps/api/tauri'
 
     export let directory: TDir | null;
@@ -25,7 +25,14 @@
             
         if ($opened_files.find(f => f.path === file.path)) {
             // file is already opened so dont reopen it
-            return
+            // either open/close depending on if already open
+
+            if ($curr_file == file) {
+                curr_file.set(null);
+            } else {
+                curr_file.set(file);
+            }
+            return;
         }
 
         invoke('open_file', { path: file.path }).then((resp: any) => {
@@ -57,7 +64,14 @@
                         </svelte:self>
                     {:else}
                         <div>
-                            <pre on:click={() => openFile(subnode.file)} class="file">{depth + '  ' + subnode.file?.name}</pre>
+                            {#if subnode.file !== undefined}
+                                <pre 
+                                    on:click={() => openFile(subnode.file)} 
+                                    class="file"
+                                    data-opened={$opened_files.includes(subnode.file)}
+                                    data-current={subnode.file === $curr_file}
+                                    >{depth + '  ' + subnode.file?.name}</pre>
+                            {/if}
                         </div>
                     {/if}
                 {/each}
@@ -65,6 +79,7 @@
         {/if}
     {/if}
 </div>
+
 
 <style>
     pre.dir {
@@ -81,8 +96,12 @@
         width: 100%;
     }
 
-    pre:hover {
+    pre:hover, pre[data-current="true"] {
         background-color: var(--medium-bg-color);
+    }
+
+    pre[data-opened="true"]::after {
+        content: "*";
     }
 
     div {

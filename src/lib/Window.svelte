@@ -6,7 +6,7 @@
     import EditorConsole from './EditorConsole.svelte';
     import { TDir, TFile } from '../file';
     import {FNode} from '../file'
-    import { root, opened_files } from '../stores';
+    import { root, opened_files, curr_file } from '../stores';
 	import WorkspaceSidebar from './WorkspaceSidebar.svelte';
 	import { onDestroy } from 'svelte';
 
@@ -66,17 +66,16 @@
         root.set(top.dir);
     });
 
-    let current_file: TFile | null = null;
     let old_num_files: number = 0;
 
     let unsub = opened_files.subscribe((ofiles) => {
         if (ofiles.length > old_num_files) {
             // New opened file at end of list
-            current_file = ofiles.at(-1) || null;
+            curr_file.set(ofiles.at(-1) || null);
         } else if (ofiles.length < old_num_files) {
-            if (current_file !== null && !ofiles.includes(current_file)) {
+            if ($curr_file !== null && !ofiles.includes($curr_file)) {
                 // current file was closed
-                current_file = null;
+                curr_file.set(null);
             }
         }
 
@@ -87,11 +86,11 @@
 </script>
 
 <div>
-    <Topbar bind:current_file/> 
+    <Topbar /> 
     <main>
         <WorkspaceSidebar></WorkspaceSidebar> 
-        {#if current_file !== null}
-            <TextEditor bind:current_file />
+        {#if $curr_file !== null}
+            <TextEditor bind:current_file={$curr_file} />
         {:else}
             <TextEditor current_file={empty_file} />
         {/if}
