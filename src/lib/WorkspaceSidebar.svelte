@@ -6,7 +6,11 @@
 
     let directory: TDir | null;
     let unsubscribe = root.subscribe((val) => {
-        directory = val; 
+        if (val !== null && val.dir !== undefined) {
+            directory = val.dir; 
+        } else {
+            directory = null;
+        }
     });
     onDestroy(() => unsubscribe());
 

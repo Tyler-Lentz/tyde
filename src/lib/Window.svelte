@@ -13,21 +13,40 @@
     let econsole: EditorConsole;
 
     appWindow.listen('open-file', (event: any) => {
-        // files.update((files) => {
-        //     let file = new TFile(event.payload.name, event.payload.content);
+        opened_files.update((ofiles) => {
+            if (!("File" in event.payload)) {
+                econsole.add("Error opening file");
+                return ofiles;
+            }
+            
+            let path = event.payload.File.path;
+            let content = event.payload.File.content;
 
-        //     for (const f of files) {
-        //         if (f.path === file.path) {
-        //             econsole.add(`File ${file.path} already open`);
-        //             return files;
-        //         }
-        //     }
+            let file: TFile | undefined = undefined;
+            if ($root !== null) {
+                file = $root.search(path);
+                if (file !== undefined) {
+                    file.content = content;
+                }
+            }
 
-        //     files.push(file);
-        //     current_file = files.length - 1;
-        //     econsole.add(`Opened ${file.path}`);
-        //     return files;
-        // });
+            if (file === undefined) {
+                file = new TFile(path, content);
+            }
+
+            for (const f of $opened_files) {
+                if (f.path === file.path) {
+                    // file already opened
+                    curr_file.set(file);
+                    return ofiles;
+                }
+            }
+
+            ofiles.push(file);
+            curr_file.set(file);
+            econsole.add(`Opened ${file.path}`);
+            return ofiles;
+        });
     });
 
     appWindow.listen('save-file', (_) => {
@@ -65,7 +84,7 @@
             return;
         }
         
-        root.set(top.dir);
+        root.set(top);
     });
 
     let old_num_files: number = 0;
