@@ -47,6 +47,7 @@
         display: flex;
         flex-direction: row;
         width: 100%;
+        height: 100%;
         margin: 0;
     }
 
@@ -62,7 +63,7 @@
     }
 
     textarea.line_nums {
-        height: 90vh;
+        height: 75vh;
         color: var(--text-highlight-color);
         overflow: hidden;
         text-align: right;
@@ -76,9 +77,10 @@
     }
 
     textarea.editor {
-        height: 90vh;
+        height: 75vh;
         width: 100%;
         border-left: 1px solid var(--dark-highlight-color);
+        border-right: 1px solid var(--dark-highlight-color);
         color: var(--text-default-color);
     }
 

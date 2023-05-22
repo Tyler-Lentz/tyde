@@ -4,6 +4,7 @@
     import Topbar from './Topbar.svelte';
     import TextEditor from './TextEditor.svelte';
     import EditorConsole from './EditorConsole.svelte';
+    import Terminal from './Terminal.svelte';
     import { TDir, TFile } from '../file';
     import {FNode} from '../file'
     import { root, opened_files, curr_file } from '../stores';
@@ -110,7 +111,10 @@
     <Topbar /> 
     <main>
         <WorkspaceSidebar />
-        <TextEditor />
+        <div>
+            <TextEditor />
+            <Terminal />
+        </div>
     </main>
     <EditorConsole bind:this={econsole}/>
 </div>
