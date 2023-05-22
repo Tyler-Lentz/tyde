@@ -37,7 +37,7 @@
         background-color: var(--dark-bg-color);
         border-bottom: 1px solid var(--dark-highlight-color);
         width: 100vw;
-        min-height: 1.3rem;
+        min-height: var(--topbar-height);
         -webkit-user-select: none;
         user-select: none;
     }

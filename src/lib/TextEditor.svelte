@@ -47,6 +47,7 @@
         display: flex;
         flex-direction: row;
         width: 100%;
+        height: 100%;
         margin: 0;
     }
 
@@ -56,13 +57,13 @@
         outline: 0;
         border: none;
         font-family: monospace;
-        background-color: var(--dark-bg-color);
         font-size: var(--font-size);
         tab-size: 4;
+        height: var(--text-editor-height);
+        background-color: var(--dark-bg-color);
     }
 
     textarea.line_nums {
-        height: 90vh;
         color: var(--text-highlight-color);
         overflow: hidden;
         text-align: right;
@@ -76,9 +77,9 @@
     }
 
     textarea.editor {
-        height: 90vh;
         width: 100%;
         border-left: 1px solid var(--dark-highlight-color);
+        border-right: 1px solid var(--dark-highlight-color);
         color: var(--text-default-color);
     }
 
