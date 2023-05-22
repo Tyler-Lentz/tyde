@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { onDestroy } from "svelte";
-    import type {TFile} from "../file"
     import {curr_file} from "../stores"
+    import {arrowDown, arrowUp, arrowLeft, arrowRight, insertAtCursor} from '../util';
 
     let num_lines: number = 0;
     let line_nums: String = '';
@@ -31,12 +30,63 @@
     }).join('\n');
     $: max_line_size = String(num_lines).length * 16;
 
+    let command_mode = false;
+    
+    function commandModeKeyPress(ev: KeyboardEvent) {
+        ev.preventDefault();
+        switch (ev.key) {
+            case "i": 
+                command_mode = false;
+                break;
+            case "j":
+                arrowDown(editor_elem);
+                break;
+            case "k":
+                arrowUp(editor_elem);
+                break;
+            case "h":
+                arrowLeft(editor_elem);
+                break;
+            case "l":
+                arrowRight(editor_elem);
+                break;
+            case "o":
+                insertAtCursor(editor_elem, '\n');
+                break;
+        }
+    }
+
+    function insertModeKeyPress(ev: KeyboardEvent) {
+        switch (ev.key) {
+            case "Escape":
+                command_mode = true;
+                ev.preventDefault();
+                break;
+        }
+    }
+
+    function handleKeyPress(ev: KeyboardEvent) {
+        if (command_mode) {
+            commandModeKeyPress(ev);
+        } else {
+            insertModeKeyPress(ev);
+        }
+    }
 </script>
 
 <div >
     <textarea bind:this={line_nums_elem} class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
     {#if $curr_file !== null}
-        <textarea bind:this={editor_elem} on:change={setMutated} on:scroll={parseScroll} class="editor" bind:value={$curr_file.content} readonly={$curr_file.content === null}></textarea>
+        <textarea 
+            bind:this={editor_elem} 
+            bind:value={$curr_file.content} 
+            on:change={setMutated} 
+            on:scroll={parseScroll} 
+            on:keydown={handleKeyPress}
+            data-command-mode={command_mode}
+            class="editor" 
+            readonly={$curr_file.content === null}
+            ></textarea>
     {:else}
         <textarea bind:this={editor_elem} class="editor" value="" readonly></textarea>
     {/if}
@@ -88,4 +138,7 @@
         color: var(--text-highlight-color);
     }
 
+    textarea.editor[data-command-mode="true"] {
+        caret-color: var(--text-highlight-color);
+    }
 </style>
