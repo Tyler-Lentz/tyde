@@ -1,6 +1,7 @@
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder};
 use crate::filesystem;
+use crate::shell;
 
 fn build_menu() -> Menu {
     let open = CustomMenuItem::new("open", "Open");
@@ -75,7 +76,7 @@ pub fn show() {
     tauri::Builder::default()
         .menu(build_menu())
         .on_menu_event(handle_menu_events)
-        .invoke_handler(tauri::generate_handler![filesystem::save_file, filesystem::open_file])
+        .invoke_handler(tauri::generate_handler![filesystem::save_file, filesystem::open_file, shell::shell_exec])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

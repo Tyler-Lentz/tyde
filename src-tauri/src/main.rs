@@ -3,6 +3,7 @@
 
 mod filesystem;
 mod ui;
+mod shell;
 
 fn main() {
     ui::show();
