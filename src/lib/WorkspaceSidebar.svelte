@@ -38,7 +38,7 @@
         flex-direction: column;
         border: 1px solid var(--dark-highlight-color);
         background-color: var(--dark-bg-color);
-        height: calc(90vh + 3px);
+        height: var(--sidebar-height);
         border-bottom: none;
         border-top: none;
     }

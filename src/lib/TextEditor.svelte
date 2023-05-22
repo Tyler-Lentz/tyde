@@ -57,13 +57,13 @@
         outline: 0;
         border: none;
         font-family: monospace;
-        background-color: var(--dark-bg-color);
         font-size: var(--font-size);
         tab-size: 4;
+        height: var(--text-editor-height);
+        background-color: var(--dark-bg-color);
     }
 
     textarea.line_nums {
-        height: 75vh;
         color: var(--text-highlight-color);
         overflow: hidden;
         text-align: right;
@@ -77,7 +77,6 @@
     }
 
     textarea.editor {
-        height: 75vh;
         width: 100%;
         border-left: 1px solid var(--dark-highlight-color);
         border-right: 1px solid var(--dark-highlight-color);

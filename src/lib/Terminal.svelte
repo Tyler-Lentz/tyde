@@ -1,72 +1,61 @@
 <script lang="ts">
-    import { invoke } from '@tauri-apps/api/tauri'
+    import { invoke } from '@tauri-apps/api/tauri';
+    import { appWindow } from '@tauri-apps/api/window';
+    import { Terminal } from 'xterm';
+    import { FitAddon } from 'xterm-addon-fit';
+    import "xterm/css/xterm.css";
+    import type { Event } from '@tauri-apps/api/event';
+	import { onMount } from 'svelte';
 
-    let text: Array<String> = [];
-    let input: HTMLInputElement;
+    let terminal_element: HTMLElement;
+    let terminal: Terminal;
+    let fit: FitAddon;
 
-    function focus() {
-        input.focus();
+    function fitTerminal() {
+        fit.fit();
+        invoke("async_resize_pty", {
+            rows: terminal.rows, cols: terminal.cols
+        });
     }
 
-    function checkForSubmission(event: KeyboardEvent) {
-        console.log(event.key);
-        if (event.key === "Enter") {
-            console.log("in enter");
-            let command = input.value;
-            invoke('shell_exec', { command: command }).then((output: any) => {
-                console.log("outpt")
-                console.log(output);
-                text.push(`${command}${output}`);
-            });
-        }
+    function writeToTerminal(ev: Event<string>) {
+        terminal.write(ev.payload);
     }
 
+    function writeToPty(data: string) {
+        invoke("async_write_to_pty", {data});
+    }
+
+    onMount(async () => {
+        fit = new FitAddon();
+        terminal = new Terminal({
+            fontFamily: "monospace",
+            theme: {
+                background: "rgb(30,30,30)", // --darkest-bg-color
+            }
+        });
+        terminal.loadAddon(fit);
+        terminal.open(terminal_element);
+
+        appWindow.listen("terminal-data", writeToTerminal);
+        terminal.onData(writeToPty);
+        fitTerminal();
+
+        setInterval(fitTerminal, 10); // TODO: figure out better way to do this
+    })
 </script>
 
-<div on:click={focus}>
-    {#each text as line}
-        <pre>{line}</pre> 
-    {/each}
-    <span><input bind:this={input} type="text"/></span>
+<div bind:this={terminal_element}>
+
 </div>
-<svelte:window on:keydown={checkForSubmission}></svelte:window>
 
 <style>
     div {
-        background-color: var(--dark-bg-color);
-        color: var(--text-default-color);
+        width: 100%;
+        height: var(--terminal-height);
         border: 1px solid var(--dark-highlight-color);
+        box-sizing: border-box;
         border-left: none;
         border-bottom: none;
-        box-sizing: border-box;
-        height: 15vh;
-        width: 100%;
-        user-select: none;
-        -webkit-user-select: none;
-        font-size: var(--font-size);
-    }
-
-    input {
-        all: unset;
-        font-family: monospace;
-        width: 95%;
-    }
-
-    pre, input {
-        padding: 0;
-        margin: 0;
-        user-select: text;
-        -webkit-user-select: text;
-    }
-
-    pre::before, span::before{
-        content: "$: ";
-        font-family: monospace;
-        color: var(--text-highlight-color);
-    }
-
-    pre::selection, input::selection {
-        background-color: var(--text-highlight-color);
-        color: var(--text-highlight-color);
     }
 </style>

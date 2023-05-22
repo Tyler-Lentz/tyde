@@ -107,7 +107,7 @@
 
 </script>
 
-<div>
+<div class="top">
     <Topbar /> 
     <main>
         <WorkspaceSidebar />
@@ -120,6 +120,10 @@
 </div>
 
 <style>
+    .top {
+        overflow: hidden;
+    }
+
     div {
         background-color: var(--darkest-bg-color);
         display: flex;
