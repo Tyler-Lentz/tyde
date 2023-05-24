@@ -1,144 +1,73 @@
 <script lang="ts">
+	import { onDestroy } from "svelte";
     import {curr_file} from "../stores"
     import {arrowDown, arrowUp, arrowLeft, arrowRight, insertAtCursor} from '../util';
 
-    let num_lines: number = 0;
-    let line_nums: String = '';
+    let vim_mode: boolean;
 
-    let editor_elem: HTMLTextAreaElement;
-    let line_nums_elem: HTMLTextAreaElement;
+    let contents: Array<[string, string]> = [];
 
-    function parseScroll() {
-        line_nums_elem.scrollTop = editor_elem.scrollTop; 
-    }
-
-    function setMutated() {
-        if ($curr_file !== null) {
-            $curr_file.mutated = true;
-            curr_file.update(a => a);
-        }
-    }
-
-    $: fcontent = $curr_file !== null && $curr_file.content !== null ? $curr_file.content : "";
-    $: num_lines = fcontent.split('\n').length;
-    $: line_nums = Array(num_lines).fill(0).map((_, num) => {
-        if ($curr_file!== null && $curr_file.content !== null) {
-            return `${num+1}`;
+    let unsub = curr_file.subscribe((new_file) => {
+        if (new_file !== null && new_file.content !== null) {
+            contents = new_file.content
+                        .split('\n')
+                        .map((line_content, line_number) => [formatLineNumber(line_number + 1), line_content])
         } else {
-            return '';
+            contents = [];
         }
-    }).join('\n');
-    $: max_line_size = String(num_lines).length * 16;
+    });
 
-    let command_mode = false;
-    
-    function commandModeKeyPress(ev: KeyboardEvent) {
-        ev.preventDefault();
-        switch (ev.key) {
-            case "i": 
-                command_mode = false;
-                break;
-            case "j":
-                arrowDown(editor_elem);
-                break;
-            case "k":
-                arrowUp(editor_elem);
-                break;
-            case "h":
-                arrowLeft(editor_elem);
-                break;
-            case "l":
-                arrowRight(editor_elem);
-                break;
-            case "o":
-                insertAtCursor(editor_elem, '\n');
-                break;
-        }
+    function formatLineNumber(line_number: number):string {
+        let str_len = String(contents.length).length; // how many chars the largest line number is
+        return String(line_number).padEnd(str_len, ' ');
     }
 
-    function insertModeKeyPress(ev: KeyboardEvent) {
-        switch (ev.key) {
-            case "Escape":
-                command_mode = true;
-                ev.preventDefault();
-                break;
-        }
-    }
-
-    function handleKeyPress(ev: KeyboardEvent) {
-        if (command_mode) {
-            commandModeKeyPress(ev);
-        } else {
-            insertModeKeyPress(ev);
-        }
-    }
+    onDestroy(() => {
+        unsub();
+    });
 </script>
 
-<div >
-    <textarea bind:this={line_nums_elem} class="line_nums" readonly bind:value={line_nums} style:width="{max_line_size}px" ></textarea>
-    {#if $curr_file !== null}
-        <textarea 
-            bind:this={editor_elem} 
-            bind:value={$curr_file.content} 
-            on:change={setMutated} 
-            on:scroll={parseScroll} 
-            on:keydown={handleKeyPress}
-            data-command-mode={command_mode}
-            class="editor" 
-            readonly={$curr_file.content === null}
-            ></textarea>
-    {:else}
-        <textarea bind:this={editor_elem} class="editor" value="" readonly></textarea>
-    {/if}
+<div class="container">
+    {#each contents as [line_number, line_content]}
+    <div>
+        <span class="linenum">{line_number}</span><pre contenteditable>{line_content}</pre>
+    </div>
+    {/each}
 </div>
 
 <style >
-    div {
+    div.container {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         width: 100%;
         height: 100%;
         margin: 0;
-    }
-
-    textarea {
-        resize: none;
-        box-shadow: none;
-        outline: 0;
-        border: none;
-        font-family: monospace;
-        font-size: var(--font-size);
-        tab-size: 4;
-        height: var(--text-editor-height);
         background-color: var(--dark-bg-color);
-    }
-
-    textarea.line_nums {
-        color: var(--text-highlight-color);
-        overflow: hidden;
-        text-align: right;
-        min-width: 32px;
-        -webkit-user-select: none;
-        user-select: none;
-    }
-
-    textarea.line_nums::selection {
-        background-color: none;
-    }
-
-    textarea.editor {
-        width: 100%;
-        border-left: 1px solid var(--dark-highlight-color);
-        border-right: 1px solid var(--dark-highlight-color);
         color: var(--text-default-color);
+        font-size: var(--font-size);
+        height: var(--text-editor-height);
+        overflow: scroll;
     }
 
-    textarea.editor::selection {
-        background-color: var(--text-highlight-color);
+    span.linenum {
+        display: inline;
+        padding:0;
+        margin:0;
+        margin-right:1rem;
+        user-select: none;
+        -webkit-user-select: none;
         color: var(--text-highlight-color);
+        font-family: monospace;
     }
 
-    textarea.editor[data-command-mode="true"] {
-        caret-color: var(--text-highlight-color);
+    pre[contenteditable] {
+        display: inline;
+        margin: 0;
+        padding: 0;
+        outline: 0;
+        color: var(--text-default-color);
+        font: monospace;
+        width: 100%;
     }
+
 </style>
