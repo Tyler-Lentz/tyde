@@ -33,6 +33,7 @@
     function handleClick(event: MouseEvent) {
         if (event.target !== null) {
             (event.target as HTMLPreElement)?.focus();
+            farthest_index = getIndex();
         }
     }
 
@@ -82,6 +83,9 @@
                 arrowLeft(line_elems[selected_line]);
                 farthest_index = getIndex();
                 break;
+            default:
+                farthest_index = getIndex();
+                break;
         }
     }
 
@@ -128,6 +132,15 @@
                 line_elems[selected_line].focus();
                 setIndex(0, line_elems[selected_line]);
                 farthest_index = getIndex();
+                break;
+            case "o":
+                command_mode = false;
+                contents.splice(selected_line + 1, 0, "");
+                if ($curr_file !== null) {
+                    $curr_file.content = contents;
+                }
+                selected_line++;
+                line_elems[selected_line].focus();
                 break;
         }
     }
