@@ -7,6 +7,9 @@ export function getIndex(): number {
 export function setIndex(indx: number, el: HTMLPreElement) {
     let range = document.createRange();
     let sel = window.getSelection();
+    if (indx > el.innerText.length) {
+        indx = el.innerText.length;
+    }
     range.setStart(el.childNodes[0], indx);
     range.collapse(true);
     sel?.removeAllRanges();

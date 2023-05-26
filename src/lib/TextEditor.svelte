@@ -28,6 +28,8 @@
     let command_mode: boolean = false;
     let selected_line: number = 0;
     let line_elems: Array<HTMLPreElement> = [];
+    
+    let farthest_index: number = 0;
 
     function handleClick(event: MouseEvent) {
         if (event.target !== null) {
@@ -52,59 +54,71 @@
     function handleKeyDownNormalMode(event: KeyboardEvent) {
         switch (event.key) {
             case "Escape":
-                command_mode = true;
                 event.preventDefault();
+                command_mode = true;
                 return;
             case "ArrowDown":
+                event.preventDefault();
                 if (selected_line < contents.length - 1) {
                     selected_line++;
                     line_elems[selected_line].focus();
+                    setIndex(farthest_index, line_elems[selected_line]);
                 }
-                event.preventDefault();
                 break;
             case "ArrowUp":
+                event.preventDefault();
                 if (selected_line > 0) {
                     selected_line--;
                     line_elems[selected_line].focus();
+                    setIndex(farthest_index, line_elems[selected_line]);
                 }
+                break;
+            case "ArrowRight":
                 event.preventDefault();
+                arrowRight(line_elems[selected_line]);
+                farthest_index = getIndex();
+                break;
+            case "ArrowLeft":
+                event.preventDefault();
+                arrowLeft(line_elems[selected_line]);
+                farthest_index = getIndex();
                 break;
         }
     }
 
     function handleKeyDownCommandMode(event: KeyboardEvent) {
+        event.preventDefault();
         switch (event.key) {
             case "ArrowDown":
             case "j":
                 if (selected_line < contents.length - 1) {
-                    let index = getIndex();
                     selected_line++;
                     line_elems[selected_line].focus();
-                    setIndex(index, line_elems[selected_line]);
+                    setIndex(farthest_index, line_elems[selected_line]);
                 }
                 break;
             case "ArrowUp":
             case "k":
                 if (selected_line > 0) {
-                    let index = getIndex();
                     selected_line--;
                     line_elems[selected_line].focus();
-                    setIndex(index, line_elems[selected_line]);
+                    setIndex(farthest_index, line_elems[selected_line]);
                 }
                 break;
             case "ArrowRight":
             case "l":
                 arrowRight(line_elems[selected_line]);
+                farthest_index = getIndex();
                 break;
             case "ArrowLeft":
             case "h":
                 arrowLeft(line_elems[selected_line]);
+                farthest_index = getIndex();
                 break;
             case "i":
                 command_mode = false;
                 break;
         }
-        event.preventDefault();
     }
 </script>
 
