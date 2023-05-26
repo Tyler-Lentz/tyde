@@ -71,7 +71,6 @@ export class TDir {
     contents: Array<FNode>;
     open: boolean;
     constructor(path: string, contents: Array<FNode>) {
-        console.log("making dir", path, contents);
         this.path = path;
         this.name = path.split('/').at(-1) || path;
         this.contents = contents;
@@ -93,7 +92,6 @@ export class TFile {
     content: string | null;
     mutated: boolean;
     constructor(path: string, content: string | null) {
-        console.log("making file", path, content);
         this.path = path;
         this.name = path.split('/').at(-1) || path;
         this.content = content;
