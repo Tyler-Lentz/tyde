@@ -124,7 +124,7 @@
 
 <div class="container">
     {#each contents as [line_number, line_content], index}
-    <div>
+    <div class="line-container">
         <span class="linenum"><pre>{line_number}</pre></span>
         <pre 
             bind:this={line_elems[index]} 
@@ -150,6 +150,15 @@
         font-size: var(--font-size);
         height: var(--text-editor-height);
         overflow: scroll;
+    }
+
+    div.line-container {
+        width: 100%;
+    }
+
+    div.line-container:has(pre[contenteditable]:focus) {
+        border-top: 1px solid var(--opaque-border);
+        border-bottom: 1px solid var(--opaque-border);
     }
 
     span.linenum {
