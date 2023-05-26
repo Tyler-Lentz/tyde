@@ -45,103 +45,101 @@
 
     function handleKeyDown(event: KeyboardEvent) {
         if (command_mode) {
-            handleKeyDownCommandMode(event);
-        } else {
-            handleKeyDownNormalMode(event);
+            event.preventDefault();
         }
-    }
 
-    function handleKeyDownNormalMode(event: KeyboardEvent) {
         switch (event.key) {
-            case "Escape":
-                event.preventDefault();
-                command_mode = true;
-                return;
-            case "ArrowDown":
-                event.preventDefault();
+            case "Escape": // Enter command mode
+                if (!command_mode) {
+                    event.preventDefault();
+                    command_mode = true;
+                    break;
+                }
+            case "j": // move cursor down if command mode
+                if (!command_mode) {
+                    break;
+                }
+            case "ArrowDown": // move cursor down
                 if (selected_line < contents.length - 1) {
                     selected_line++;
                     line_elems[selected_line].focus();
                     setIndex(farthest_index, line_elems[selected_line]);
                 }
                 break;
-            case "ArrowUp":
-                event.preventDefault();
+
+            case "k": // move cursor up if command mode
+                if (!command_mode) {
+                    break;
+                }
+            case "ArrowUp": // move cursor up
                 if (selected_line > 0) {
                     selected_line--;
                     line_elems[selected_line].focus();
                     setIndex(farthest_index, line_elems[selected_line]);
                 }
                 break;
-            case "ArrowRight":
-                event.preventDefault();
+
+            case "a": // move cursor right and enter insert mode if command mode
+                if (!command_mode) {
+                    break;
+                }
+                command_mode = false;
                 arrowRight(line_elems[selected_line]);
                 farthest_index = getIndex();
                 break;
-            case "ArrowLeft":
-                event.preventDefault();
+
+            case "l": // move cursor right if command mode
+                if (!command_mode) {
+                    break;
+                }
+            case "ArrowRight": // move cursor right
+                arrowRight(line_elems[selected_line]);
+                farthest_index = getIndex();
+                break;
+
+            case "h": // move cursor left if command mode
+                if (!command_mode) {
+                    break;
+                }
+            case "ArrowLeft": // move cursor left
                 arrowLeft(line_elems[selected_line]);
                 farthest_index = getIndex();
                 break;
-            default:
-                farthest_index = getIndex();
-                break;
-        }
-    }
 
-    function handleKeyDownCommandMode(event: KeyboardEvent) {
-        event.preventDefault();
-        switch (event.key) {
-            case "ArrowDown":
-            case "j":
-                if (selected_line < contents.length - 1) {
+            case "i": // enter insert mode
+                command_mode = false;
+                break;
+
+            case "$": // move cursor to end of line
+                if (command_mode) {
+                    line_elems[selected_line].focus();
+                    setIndex(line_elems[selected_line].innerText.length, line_elems[selected_line]);
+                    farthest_index = getIndex();
+                }
+                break;
+            case "0": // move cursor to beginning of line
+                if (command_mode) {
+                    line_elems[selected_line].focus();
+                    setIndex(0, line_elems[selected_line]);
+                    farthest_index = getIndex();
+                }
+                break;
+
+            case "o": // insert new line below and enter insert mode
+                if (command_mode) {
+                    command_mode = false;
+                    contents.splice(selected_line + 1, 0, "");
+                    if ($curr_file !== null) {
+                        $curr_file.content = contents;
+                    }
                     selected_line++;
                     line_elems[selected_line].focus();
-                    setIndex(farthest_index, line_elems[selected_line]);
                 }
                 break;
-            case "ArrowUp":
-            case "k":
-                if (selected_line > 0) {
-                    selected_line--;
-                    line_elems[selected_line].focus();
-                    setIndex(farthest_index, line_elems[selected_line]);
-                }
-                break;
-            case "a":
-                command_mode = false;
-            case "ArrowRight":
-            case "l":
-                arrowRight(line_elems[selected_line]);
-                farthest_index = getIndex();
-                break;
-            case "ArrowLeft":
-            case "h":
-                arrowLeft(line_elems[selected_line]);
-                farthest_index = getIndex();
-                break;
-            case "i":
-                command_mode = false;
-                break;
-            case "$":
-                line_elems[selected_line].focus();
-                setIndex(line_elems[selected_line].innerText.length, line_elems[selected_line]);
-                farthest_index = getIndex();
-                break;
-            case "0":
-                line_elems[selected_line].focus();
-                setIndex(0, line_elems[selected_line]);
-                farthest_index = getIndex();
-                break;
-            case "o":
-                command_mode = false;
-                contents.splice(selected_line + 1, 0, "");
-                if ($curr_file !== null) {
-                    $curr_file.content = contents;
-                }
-                selected_line++;
-                line_elems[selected_line].focus();
-                break;
+
+        }
+        if (!command_mode) {
+            farthest_index = getIndex();
         }
     }
 </script>
@@ -187,8 +185,9 @@
     }
 
     div.line-container:has(pre[contenteditable]:focus) {
-        border-top: 1px solid var(--opaque-border);
-        border-bottom: 1px solid var(--opaque-border);
+        -border-top: 1px solid var(--opaque-border);
+        -border-bottom: 1px solid var(--opaque-border);
+        outline: 1px solid var(--opaque-border);
     }
 
     span.linenum {
