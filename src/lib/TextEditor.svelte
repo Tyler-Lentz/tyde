@@ -3,13 +3,13 @@
     import {curr_file} from "../stores"
     import {arrowLeft, arrowRight, setIndex, getIndex} from '../util';
 
-    let contents: Array<[string, string]> = [];
+    let contents: Array<string> = [];
     let longest_lineno_len: number;
 
     let unsub = curr_file.subscribe((new_file) => {
         if (new_file !== null && new_file.content !== null) {
             longest_lineno_len = String(new_file.content.length).length;
-            contents = new_file.content.map((line_content, index) => [formatLineNumber(index + 1), line_content])
+            contents = new_file.content;
         } else {
             contents = [];
             longest_lineno_len = 0;
@@ -135,9 +135,9 @@
 
 <div class="container">
     {#if $curr_file !== null && $curr_file.content !== null}
-    {#each contents as [line_number, line_content], index}
-    <div class="line-container">
-        <span class="linenum"><pre>{line_number}</pre></span>
+    {#each contents as line_content, index}
+    <div class="line-container" style="--linenum-width: {longest_lineno_len+1}rem">
+        <span class="linenum"><pre>{index + 1}</pre></span>
         <pre 
             bind:this={line_elems[index]} 
             bind:innerText={$curr_file.content[index]}
@@ -168,6 +168,9 @@
 
     div.line-container {
         width: 100%;
+        display: grid;
+        grid-template-rows: auto;
+        grid-template-columns: var(--linenum-width) 1fr;
     }
 
     div.line-container:has(pre[contenteditable]:focus) {
@@ -184,7 +187,7 @@
         -webkit-user-select: none;
         color: var(--text-highlight-color);
         font-family: monospace;
-        padding-right: 0.75rem;
+        padding-right: 0.25rem;
         padding-left: 0.25rem;
         border-right: 1px solid var(--dark-highlight-color);
     }
