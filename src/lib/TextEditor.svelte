@@ -8,9 +8,9 @@
 
     let unsub = curr_file.subscribe((new_file) => {
         if (new_file !== null && new_file.content !== null) {
-            let split_lines = new_file.content.split('\n');
-            longest_lineno_len = String(split_lines.length).length;
-            contents = split_lines.map((line_content, line_number) => [formatLineNumber(line_number + 1), line_content])
+            longest_lineno_len = String(new_file.content.length).length;
+            console.log(typeof(new_file.content))
+            contents = new_file.content.map((line_content, index) => [formatLineNumber(index + 1), line_content])
         } else {
             contents = [];
             longest_lineno_len = 0;
@@ -123,11 +123,13 @@
 </script>
 
 <div class="container">
+    {#if $curr_file !== null && $curr_file.content !== null}
     {#each contents as [line_number, line_content], index}
     <div class="line-container">
         <span class="linenum"><pre>{line_number}</pre></span>
         <pre 
             bind:this={line_elems[index]} 
+            bind:innerText={$curr_file.content[index]}
             data-command-mode={command_mode}
             on:keydown={handleKeyDown} 
             on:click={handleClick}
@@ -136,6 +138,7 @@
             >{line_content}</pre>
     </div>
     {/each}
+    {/if}
 </div>
 
 <style >

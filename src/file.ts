@@ -89,13 +89,22 @@ export class TDir {
 export class TFile {
     path: string;
     name: string;
-    content: string | null;
+    content: Array<string> | null;
     mutated: boolean;
     constructor(path: string, content: string | null) {
         this.path = path;
         this.name = path.split('/').at(-1) || path;
-        this.content = content;
+        if (content !== null) {
+            this.content = content.split('\n');
+        } else {
+            this.content = null;
+        }
+        console.log(this.content);
         this.mutated = false;
+    }
+
+    setContent(content: string) {
+        this.content = content.split('\n');
     }
 
     isOpen():boolean {

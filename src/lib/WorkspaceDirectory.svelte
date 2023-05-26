@@ -39,7 +39,7 @@
         invoke('open_file', { path: file.path }).then((resp: any) => {
 
             econsole.set(`Opened ${resp.File.path}`);
-            file.content = resp.File.content;
+            file.setContent(resp.File.content);
 
             opened_files.update((ofiles: Array<TFile>) => {
                 ofiles.push(file);
