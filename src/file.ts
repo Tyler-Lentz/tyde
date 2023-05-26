@@ -99,7 +99,6 @@ export class TFile {
         } else {
             this.content = null;
         }
-        console.log(this.content);
         this.mutated = false;
     }
 

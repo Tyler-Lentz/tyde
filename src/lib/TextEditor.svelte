@@ -9,7 +9,6 @@
     let unsub = curr_file.subscribe((new_file) => {
         if (new_file !== null && new_file.content !== null) {
             longest_lineno_len = String(new_file.content.length).length;
-            console.log(typeof(new_file.content))
             contents = new_file.content.map((line_content, index) => [formatLineNumber(index + 1), line_content])
         } else {
             contents = [];
@@ -105,6 +104,8 @@
                     setIndex(farthest_index, line_elems[selected_line]);
                 }
                 break;
+            case "a":
+                command_mode = false;
             case "ArrowRight":
             case "l":
                 arrowRight(line_elems[selected_line]);
@@ -117,6 +118,16 @@
                 break;
             case "i":
                 command_mode = false;
+                break;
+            case "$":
+                line_elems[selected_line].focus();
+                setIndex(line_elems[selected_line].innerText.length, line_elems[selected_line]);
+                farthest_index = getIndex();
+                break;
+            case "0":
+                line_elems[selected_line].focus();
+                setIndex(0, line_elems[selected_line]);
+                farthest_index = getIndex();
                 break;
         }
     }
