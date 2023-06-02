@@ -10,10 +10,12 @@ export function setIndex(indx: number, el: HTMLPreElement) {
     if (indx > el.innerText.length) {
         indx = el.innerText.length;
     }
-    range.setStart(el.childNodes[0], indx);
-    range.collapse(true);
-    sel?.removeAllRanges();
-    sel?.addRange(range);
+    if (el.childNodes.length > 0) {
+        range.setStart(el.childNodes[0], indx);
+        range.collapse(true);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+    }
 }
 
 export function arrowLeft(el: HTMLPreElement) {
@@ -21,11 +23,13 @@ export function arrowLeft(el: HTMLPreElement) {
     let sel = window.getSelection();
     let start = sel?.getRangeAt(0).startOffset;
     if (start !== undefined && start > 0) {
-        range.setStart(el.childNodes[0], start - 1);
-        range.collapse(true);
-        sel?.removeAllRanges();
-        sel?.addRange(range);
-        el.focus();
+        if (el.childNodes.length > 0) {
+            range.setStart(el.childNodes[0], start - 1);
+            range.collapse(true);
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+            el.focus();
+        }
     }
 }
 
@@ -34,10 +38,12 @@ export function arrowRight(el: HTMLPreElement) {
     let sel = window.getSelection();
     let start = sel?.getRangeAt(0).startOffset;
     if (start !== undefined) {
-        range.setStart(el.childNodes[0], start + 1);
-        range.collapse(true);
-        sel?.removeAllRanges();
-        sel?.addRange(range);
-        el.focus();
+        if (el.childNodes.length > 0) {
+            range.setStart(el.childNodes[0], start + 1);
+            range.collapse(true);
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+            el.focus();
+        }
     }
 }

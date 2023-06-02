@@ -2,6 +2,8 @@
 	import { onDestroy } from "svelte";
     import {curr_file} from "../stores"
     import {arrowLeft, arrowRight, setIndex, getIndex} from '../util';
+    import EditorLine from "./EditorLine.svelte";
+    import VirtualList from "./VirtualList.svelte";
 
     let contents: Array<string> = [];
     let longest_lineno_len: number;
@@ -16,32 +18,37 @@
         }
     });
 
-    function formatLineNumber(line_number: number):string {
-        return String(line_number).padEnd(longest_lineno_len, ' ');
-    }
-
     onDestroy(() => {
         unsub();
     });
 
     let command_mode: boolean = false;
     let selected_line: number = 0;
-    let line_elems: Array<HTMLPreElement> = [];
     
     let farthest_index: number = 0;
+
+    let line_elems: Array<EditorLine> = [];
+
+    let virlist: VirtualList;
+    let start: number;
+    let end: number;
+
+    function getSelectedLine(): HTMLPreElement {
+        return line_elems[selected_line - 1].getLine();
+    }
 
     function handleClick(event: MouseEvent) {
         if (event.target !== null) {
             (event.target as HTMLPreElement)?.focus();
+            selected_line = parseInt((event.target as HTMLPreElement).dataset["line-number"] || "0");
             farthest_index = getIndex();
         }
     }
 
     function handleFocus(event: FocusEvent) {
-        if (event.target !== null) {
-            selected_line = line_elems.indexOf(event.target as HTMLPreElement);
-        }
     }
+
+    const SCROLL_AMT = 22;
 
     function handleKeyDown(event: KeyboardEvent) {
         if (command_mode) {
@@ -62,8 +69,12 @@
             case "ArrowDown": // move cursor down
                 if (selected_line < contents.length - 1) {
                     selected_line++;
-                    line_elems[selected_line].focus();
-                    setIndex(farthest_index, line_elems[selected_line]);
+                    console.log(selected_line)
+                    getSelectedLine().focus();
+                    setIndex(farthest_index, getSelectedLine());
+                    if (selected_line >= end - 2) {
+                        virlist.scrollBy(0, SCROLL_AMT);
+                    }
                 }
                 break;
 
@@ -74,8 +85,11 @@
             case "ArrowUp": // move cursor up
                 if (selected_line > 0) {
                     selected_line--;
-                    line_elems[selected_line].focus();
-                    setIndex(farthest_index, line_elems[selected_line]);
+                    getSelectedLine().focus();
+                    setIndex(farthest_index, getSelectedLine());
+                    if (selected_line <= start + 2) {
+                        virlist.scrollBy(0, -SCROLL_AMT);
+                    }
                 }
                 break;
 
@@ -84,7 +98,7 @@
                     break;
                 }
                 command_mode = false;
-                arrowRight(line_elems[selected_line]);
+                arrowRight(getSelectedLine());
                 farthest_index = getIndex();
                 break;
 
@@ -93,7 +107,7 @@
                     break;
                 }
             case "ArrowRight": // move cursor right
-                arrowRight(line_elems[selected_line]);
+                arrowRight(getSelectedLine());
                 farthest_index = getIndex();
                 break;
 
@@ -102,7 +116,7 @@
                     break;
                 }
             case "ArrowLeft": // move cursor left
-                arrowLeft(line_elems[selected_line]);
+                arrowLeft(getSelectedLine());
                 farthest_index = getIndex();
                 break;
 
@@ -112,28 +126,38 @@
 
             case "$": // move cursor to end of line
                 if (command_mode) {
-                    line_elems[selected_line].focus();
-                    setIndex(line_elems[selected_line].innerText.length, line_elems[selected_line]);
+                    getSelectedLine().focus();
+                    setIndex(getSelectedLine().innerText.length, getSelectedLine());
                     farthest_index = getIndex();
                 }
                 break;
             case "0": // move cursor to beginning of line
                 if (command_mode) {
-                    line_elems[selected_line].focus();
-                    setIndex(0, line_elems[selected_line]);
+                    getSelectedLine().focus();
+                    setIndex(0, getSelectedLine());
                     farthest_index = getIndex();
                 }
                 break;
 
+            case "Enter":
+                if (command_mode) {
+                    break;
+                } else {
+                    event.preventDefault();
+                    command_mode = true; // trick into going into lower block
+                }
             case "o": // insert new line below and enter insert mode
                 if (command_mode) {
                     command_mode = false;
-                    contents.splice(selected_line + 1, 0, "");
+                    contents.splice(selected_line, 0, "");
                     if ($curr_file !== null) {
                         $curr_file.content = contents;
                     }
                     selected_line++;
-                    line_elems[selected_line].focus();
+                    getSelectedLine().focus();
+                    if (selected_line >= end - 2) {
+                        virlist.scrollBy(0, SCROLL_AMT);
+                    }
                 }
                 break;
 
@@ -144,22 +168,32 @@
     }
 </script>
 
-<div class="container">
+<div class="container" >
     {#if $curr_file !== null && $curr_file.content !== null}
-    {#each contents as line_content, index}
-    <div class="line-container" style="--linenum-width: {longest_lineno_len+1}rem">
-        <span class="linenum"><pre>{index + 1}</pre></span>
-        <pre 
-            bind:this={line_elems[index]} 
-            bind:innerText={$curr_file.content[index]}
-            data-command-mode={command_mode}
-            on:keydown={handleKeyDown} 
-            on:click={handleClick}
-            on:focus={handleFocus}
-            contenteditable
-            >{line_content}</pre>
-    </div>
-    {/each}
+    <!-- {#each contents as line_content, index}
+    <EditorLine 
+        init_content={line_content}
+        line_number={index + 1}
+        command_mode={command_mode}
+        handleClick={handleClick}
+        handleFocus={handleFocus}
+        handleKeyDown={handleKeyDown}
+        bind:this={line_elems[index]}
+        bind:innerText={$curr_file.content[index]}
+        />
+    {/each} -->
+    <VirtualList bind:this={virlist} items={contents.map((e, i) => [e, i])} let:item bind:start bind:end>
+        <EditorLine 
+            init_content={item[0]}
+            line_number={item[1] + 1}
+            command_mode={command_mode}
+            handleClick={handleClick}
+            handleFocus={handleFocus}
+            handleKeyDown={handleKeyDown}
+            bind:this={line_elems[item[1]]}
+            bind:innerText={$curr_file.content[item[1]]}
+            />
+    </VirtualList>
     {/if}
 </div>
 
@@ -176,49 +210,4 @@
         height: var(--text-editor-height);
         overflow: scroll;
     }
-
-    div.line-container {
-        width: 100%;
-        display: grid;
-        grid-template-rows: auto;
-        grid-template-columns: var(--linenum-width) 1fr;
-    }
-
-    div.line-container:has(pre[contenteditable]:focus) {
-        -border-top: 1px solid var(--opaque-border);
-        -border-bottom: 1px solid var(--opaque-border);
-        outline: 1px solid var(--opaque-border);
-    }
-
-    span.linenum {
-        display: inline;
-        padding:0;
-        margin:0;
-        margin-right:0.5rem;
-        user-select: none;
-        -webkit-user-select: none;
-        color: var(--text-highlight-color);
-        font-family: monospace;
-        padding-right: 0.25rem;
-        padding-left: 0.25rem;
-        border-right: 1px solid var(--dark-highlight-color);
-    }
-
-    pre {
-        display: inline;
-        margin: 0;
-        padding: 0;
-        outline: 0;
-    }
-
-    pre[contenteditable] {
-        color: var(--text-default-color);
-        font: monospace;
-        width: 100%;
-    }
-
-    pre[data-command-mode="true"] {
-        caret-color: var(--text-highlight-color);
-    }
-
 </style>
