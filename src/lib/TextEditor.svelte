@@ -170,18 +170,6 @@
 
 <div class="container" >
     {#if $curr_file !== null && $curr_file.content !== null}
-    <!-- {#each contents as line_content, index}
-    <EditorLine 
-        init_content={line_content}
-        line_number={index + 1}
-        command_mode={command_mode}
-        handleClick={handleClick}
-        handleFocus={handleFocus}
-        handleKeyDown={handleKeyDown}
-        bind:this={line_elems[index]}
-        bind:innerText={$curr_file.content[index]}
-        />
-    {/each} -->
     <VirtualList bind:this={virlist} items={contents.map((e, i) => [e, i])} let:item bind:start bind:end>
         <EditorLine 
             init_content={item[0]}
@@ -190,6 +178,7 @@
             handleClick={handleClick}
             handleFocus={handleFocus}
             handleKeyDown={handleKeyDown}
+            bind:longest_lineno_len
             bind:this={line_elems[item[1]]}
             bind:innerText={$curr_file.content[item[1]]}
             />

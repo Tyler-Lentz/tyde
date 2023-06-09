@@ -10,15 +10,24 @@
 
     export let command_mode: boolean = false;
 
+    export let longest_lineno_len: number;
+
     let editable: HTMLPreElement;
 
     export function getLine() {
         return editable;
     }
+
+    function formatLineNumber():string {
+        let line_num_str = String(line_number);
+        let diff = longest_lineno_len - line_num_str.length;
+        let padding = " ".repeat(diff);
+        return line_num_str + padding;
+    }
 </script>
 
 <div class="line-container">
-    <span class="line-number"><pre>{line_number}</pre></span>
+    <span class="line-number"><pre>{formatLineNumber()}</pre></span>
     <pre 
         class="line-content"
         contenteditable
