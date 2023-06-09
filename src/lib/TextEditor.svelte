@@ -34,21 +34,67 @@
     let end: number;
 
     function getSelectedLine(): HTMLPreElement {
-        return line_elems[selected_line - 1].getLine();
+        return line_elems[selected_line].getLine();
+    }
+    function getSelectedContents(): string {
+        return contents[selected_line];
+    }
+    function appendToSelectedContents(s: string) {
+        contents[selected_line] += s;
+    }
+    function removeFromSelectedContentsAfter(index: number) {
+        contents[selected_line] = contents[selected_line].slice(0, index)
+    }
+    function removeSelectedLine() {
+        contents.splice(selected_line, 1);
+    }
+    function addNewlineBelow() {
+        contents.splice(selected_line+1, 0, "");
+    }
+
+    // Set farthest index to current cursor position
+    // relevant when using arrow keys / vim keys to move up/down
+    // so it knows where to put the cursor
+    function updateFarthestIndex() {
+        farthest_index = getIndex();
+    }
+
+    // Set cursor to be at farthest index allowed currently
+    function moveToFarthestIndex() {
+        setIndex(farthest_index, getSelectedLine());
+    }
+
+    const SCROLL_AMT = 22;
+    function checkForScrollDown() {
+        if (selected_line >= end - 2) {
+            virlist.scrollBy(0, SCROLL_AMT);
+        }
+    }
+    function checkForScrollUp() {
+        if (selected_line <= start + 2) {
+            virlist.scrollBy(0, -SCROLL_AMT);
+        }
+    }
+
+    // need to call this whenever modifying contents
+    // triggers a rerender and regenerates line_num
+    function cacheContents() {
+        if ($curr_file !== null) {
+            $curr_file.content = contents;
+        }
     }
 
     function handleClick(event: MouseEvent) {
         if (event.target !== null) {
             (event.target as HTMLPreElement)?.focus();
-            selected_line = parseInt((event.target as HTMLPreElement).dataset["line-number"] || "0");
-            farthest_index = getIndex();
+            selected_line = parseInt((event.target as HTMLPreElement).dataset["line-number"] || "0") - 1;
+            updateFarthestIndex();
         }
     }
 
     function handleFocus(event: FocusEvent) {
     }
 
-    const SCROLL_AMT = 22;
 
     function handleKeyDown(event: KeyboardEvent) {
         if (command_mode) {
@@ -70,12 +116,9 @@
             case "ArrowDown": // move cursor down
                 if (selected_line < contents.length - 1) {
                     selected_line++;
-                    console.log(selected_line)
                     getSelectedLine().focus();
-                    setIndex(farthest_index, getSelectedLine());
-                    if (selected_line >= end - 2) {
-                        virlist.scrollBy(0, SCROLL_AMT);
-                    }
+                    moveToFarthestIndex();
+                    checkForScrollDown();
                 }
                 break;
 
@@ -87,10 +130,8 @@
                 if (selected_line > 0) {
                     selected_line--;
                     getSelectedLine().focus();
-                    setIndex(farthest_index, getSelectedLine());
-                    if (selected_line <= start + 2) {
-                        virlist.scrollBy(0, -SCROLL_AMT);
-                    }
+                    moveToFarthestIndex();
+                    checkForScrollUp();
                 }
                 break;
 
@@ -100,7 +141,7 @@
                 }
                 command_mode = false;
                 arrowRight(getSelectedLine());
-                farthest_index = getIndex();
+                updateFarthestIndex();
                 break;
 
             case "l": // move cursor right if command mode
@@ -109,7 +150,7 @@
                 }
             case "ArrowRight": // move cursor right
                 arrowRight(getSelectedLine());
-                farthest_index = getIndex();
+                updateFarthestIndex();
                 break;
 
             case "h": // move cursor left if command mode
@@ -118,7 +159,7 @@
                 }
             case "ArrowLeft": // move cursor left
                 arrowLeft(getSelectedLine());
-                farthest_index = getIndex();
+                updateFarthestIndex();
                 break;
 
             case "i": // enter insert mode
@@ -129,14 +170,14 @@
                 if (command_mode) {
                     getSelectedLine().focus();
                     setIndex(getSelectedLine().innerText.length, getSelectedLine());
-                    farthest_index = getIndex();
+                    updateFarthestIndex();
                 }
                 break;
             case "0": // move cursor to beginning of line
                 if (command_mode) {
                     getSelectedLine().focus();
                     setIndex(0, getSelectedLine());
-                    farthest_index = getIndex();
+                    updateFarthestIndex();
                 }
                 break;
 
@@ -150,15 +191,19 @@
             case "o": // insert new line below and enter insert mode
                 if (command_mode) {
                     command_mode = false;
-                    contents.splice(selected_line, 0, "");
-                    if ($curr_file !== null) {
-                        $curr_file.content = contents;
+                    let startIndex = getIndex();
+                    let words_after_cursor = getSelectedContents().slice(startIndex);
+                    addNewlineBelow();
+                    if (event.key === "Enter") {
+                        removeFromSelectedContentsAfter(startIndex);
                     }
                     selected_line++;
-                    getSelectedLine().focus();
-                    if (selected_line >= end - 2) {
-                        virlist.scrollBy(0, SCROLL_AMT);
+                    if (event.key === "Enter") {
+                        appendToSelectedContents(words_after_cursor);
                     }
+                    cacheContents();
+                    getSelectedLine().focus();
+                    checkForScrollDown();
                 }
                 break;
 
@@ -170,19 +215,20 @@
                 if (getIndex() === 0) {
                     // We are at the start of the line, so we should get all of the text on the current line
                     // and move it to after the previous line but without the line break
-                    let carry_over_text = line_elems[selected_line].getLine().innerText;
+                    let carry_over_text = getSelectedContents();
                     if (selected_line > 0) {
-                        contents.splice(selected_line, 1);
+                        event.preventDefault();
+                        removeSelectedLine();
                         selected_line--;
-                        contents[selected_line] += carry_over_text;
-                        if ($curr_file !== null) {
-                            $curr_file.content = contents;
-                        }
+                        let original_text = getSelectedContents();
+                        appendToSelectedContents(carry_over_text);
+                        cacheContents();
                         getSelectedLine().focus();
-                        setIndex(contents[selected_line].length - 1, line_elems[selected_line].getLine());
-                        if (selected_line <= start + 2) {
-                            virlist.scrollBy(0, -SCROLL_AMT);
-                        }
+                        setTimeout(() => {
+                            // send to event loop to make sure everything has been updated by the time this is run
+                            setIndex(original_text.length, getSelectedLine());
+                        }, 0);
+                        checkForScrollUp();
                     }
                 }
                 break;
