@@ -62,6 +62,7 @@
                     command_mode = true;
                     break;
                 }
+
             case "j": // move cursor down if command mode
                 if (!command_mode) {
                     break;
@@ -157,6 +158,31 @@
                     getSelectedLine().focus();
                     if (selected_line >= end - 2) {
                         virlist.scrollBy(0, SCROLL_AMT);
+                    }
+                }
+                break;
+
+            case "Backspace": // need to check if at beginning of a line
+                if (command_mode) {
+                    // TODO: handle backspace on command entry
+                    break;
+                }
+                if (getIndex() === 0) {
+                    // We are at the start of the line, so we should get all of the text on the current line
+                    // and move it to after the previous line but without the line break
+                    let carry_over_text = line_elems[selected_line].getLine().innerText;
+                    if (selected_line > 0) {
+                        contents.splice(selected_line, 1);
+                        selected_line--;
+                        contents[selected_line] += carry_over_text;
+                        if ($curr_file !== null) {
+                            $curr_file.content = contents;
+                        }
+                        getSelectedLine().focus();
+                        setIndex(contents[selected_line].length - 1, line_elems[selected_line].getLine());
+                        if (selected_line <= start + 2) {
+                            virlist.scrollBy(0, -SCROLL_AMT);
+                        }
                     }
                 }
                 break;
