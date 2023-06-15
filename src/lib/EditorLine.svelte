@@ -1,4 +1,21 @@
 <script lang="ts">
+    import {curr_file} from "../stores"
+	import { onDestroy } from "svelte";
+
+    let longest_lineno_len: number = 1;
+
+    let unsub = curr_file.subscribe((file) => {
+        if (file !== null && file.content !== null) {
+            longest_lineno_len = String(file.content.length).length;
+        } else {
+            longest_lineno_len = 1;
+        }
+    });
+
+    onDestroy(() => {
+        unsub();
+    });
+
     export let init_content: string;
     export let line_number: number;
 
@@ -10,24 +27,16 @@
 
     export let command_mode: boolean = false;
 
-    export let longest_lineno_len: number;
-
     let editable: HTMLPreElement;
 
     export function getLine() {
         return editable;
     }
 
-    function formatLineNumber():string {
-        let line_num_str = String(line_number);
-        let diff = longest_lineno_len - line_num_str.length;
-        let padding = " ".repeat(diff);
-        return line_num_str + padding;
-    }
 </script>
 
 <div class="line-container">
-    <span class="line-number"><pre>{formatLineNumber()}</pre></span>
+    <span class="line-number"><pre>{line_number}</pre></span>
     <pre 
         class="line-content"
         contenteditable
@@ -54,6 +63,7 @@
     }
 
     span.line-number {
+        width: 5ch;
         display: inline;
         padding:0;
         margin:0;
@@ -64,7 +74,7 @@
         font-family: monospace;
         padding-right: 0.25rem;
         padding-left: 0.25rem;
-        border-right: 1px solid var(--dark-highlight-color);
+        border-right: 1px solid var(--opaque-border);
     }
 
     pre {

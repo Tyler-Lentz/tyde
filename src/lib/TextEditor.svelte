@@ -4,18 +4,14 @@
     import {arrowLeft, arrowRight, setIndex, getIndex} from '../util';
     import EditorLine from "./EditorLine.svelte";
     import VirtualList from 'svelte-tiny-virtual-list';
-	import { append } from "svelte/internal";
 
     let contents: Array<string> = [];
-    let longest_lineno_len: number;
 
     let unsub = curr_file.subscribe((new_file) => {
         if (new_file !== null && new_file.content !== null) {
-            longest_lineno_len = String(new_file.content.length).length;
             contents = new_file.content;
         } else {
             contents = [];
-            longest_lineno_len = 0;
         }
     });
 
@@ -265,7 +261,6 @@
                 handleClick={handleClick}
                 handleFocus={handleFocus}
                 handleKeyDown={handleKeyDown}
-                bind:longest_lineno_len
                 bind:this={line_elems[index]}
                 bind:innerText={$curr_file.content[index]}
                 />
