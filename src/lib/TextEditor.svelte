@@ -4,7 +4,7 @@
     import {arrowLeft, arrowRight, setIndex, getIndex} from '../util';
     import EditorLine from "./EditorLine.svelte";
     import VirtualList from 'svelte-tiny-virtual-list';
-
+	import { append } from "svelte/internal";
 
     let contents: Array<string> = [];
     let longest_lineno_len: number;
@@ -30,10 +30,6 @@
 
     let line_elems: Array<EditorLine> = [];
 
-    let virlist: VirtualList;
-    let start: number;
-    let end: number;
-
     function getSelectedLine(): HTMLPreElement {
         return line_elems[selected_line].getLine();
     }
@@ -52,6 +48,21 @@
     function addNewlineBelow() {
         contents.splice(selected_line+1, 0, "");
     }
+    function clearSelectedLine() {
+        contents[selected_line] = "";
+    }
+    function insertAtCursor(text: string) {
+        let startIndex = getIndex();
+        let words_before_cursor = getSelectedContents().slice(0, startIndex);
+        let words_after_cursor = getSelectedContents().slice(startIndex);
+        clearSelectedLine();
+        appendToSelectedContents(words_before_cursor + text + words_after_cursor);
+        cacheContents();
+        setTimeout(() => {
+            // send to event loop to make sure everything has been updated by the time this is run
+            setIndex(startIndex + text.length, getSelectedLine());
+        }, 0);
+    }
 
     // Set farthest index to current cursor position
     // relevant when using arrow keys / vim keys to move up/down
@@ -63,18 +74,6 @@
     // Set cursor to be at farthest index allowed currently
     function moveToFarthestIndex() {
         setIndex(farthest_index, getSelectedLine());
-    }
-
-    const SCROLL_AMT = 22;
-    function checkForScrollDown() {
-        if (selected_line >= end - 2) {
-            // virlist.scrollBy(0, SCROLL_AMT);
-        }
-    }
-    function checkForScrollUp() {
-        if (selected_line <= start + 2) {
-            // virlist.scrollBy(0, -SCROLL_AMT);
-        }
     }
 
     // need to call this whenever modifying contents
@@ -119,7 +118,6 @@
                     selected_line++;
                     getSelectedLine().focus();
                     moveToFarthestIndex();
-                    checkForScrollDown();
                 }
                 break;
 
@@ -132,7 +130,6 @@
                     selected_line--;
                     getSelectedLine().focus();
                     moveToFarthestIndex();
-                    checkForScrollUp();
                 }
                 break;
 
@@ -150,6 +147,7 @@
                     break;
                 }
             case "ArrowRight": // move cursor right
+                event.preventDefault();
                 arrowRight(getSelectedLine());
                 updateFarthestIndex();
                 break;
@@ -159,6 +157,7 @@
                     break;
                 }
             case "ArrowLeft": // move cursor left
+                event.preventDefault();
                 arrowLeft(getSelectedLine());
                 updateFarthestIndex();
                 break;
@@ -195,16 +194,18 @@
                     let startIndex = getIndex();
                     let words_after_cursor = getSelectedContents().slice(startIndex);
                     addNewlineBelow();
-                    if (event.key === "Enter") {
-                        removeFromSelectedContentsAfter(startIndex);
-                    }
-                    selected_line++;
-                    if (event.key === "Enter") {
-                        appendToSelectedContents(words_after_cursor);
-                    }
                     cacheContents();
-                    getSelectedLine().focus();
-                    checkForScrollDown();
+                    setTimeout(() => {
+                        if (event.key === "Enter") {
+                            removeFromSelectedContentsAfter(startIndex);
+                        }
+                        selected_line++;
+                        if (event.key === "Enter") {
+                            appendToSelectedContents(words_after_cursor);
+                        }
+                        cacheContents();
+                        getSelectedLine().focus();
+                    }, 0)
                 }
                 break;
 
@@ -229,9 +230,16 @@
                             // send to event loop to make sure everything has been updated by the time this is run
                             setIndex(original_text.length, getSelectedLine());
                         }, 0);
-                        checkForScrollUp();
                     }
                 }
+                break;
+
+            case "Tab":
+                event.preventDefault();
+                if (command_mode) {
+                    break;
+                }
+                insertAtCursor("    ");// TODO: make an option if to use spaces or tabs
                 break;
 
         }
@@ -262,21 +270,7 @@
                 bind:innerText={$curr_file.content[index]}
                 />
         </div>
-
     </VirtualList>
-    <!-- <VirtualList bind:this={virlist} items={contents.map((e, i) => [e, i])} let:item bind:start bind:end>
-        <EditorLine 
-            init_content={item[0]}
-            line_number={item[1] + 1}
-            command_mode={command_mode}
-            handleClick={handleClick}
-            handleFocus={handleFocus}
-            handleKeyDown={handleKeyDown}
-            bind:longest_lineno_len
-            bind:this={line_elems[item[1]]}
-            bind:innerText={$curr_file.content[item[1]]}
-            />
-    </VirtualList> -->
     {/if}
 </div>
 
