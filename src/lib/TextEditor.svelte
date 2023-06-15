@@ -47,6 +47,55 @@
     function clearSelectedLine() {
         contents[selected_line] = "";
     }
+
+    const WORD_WORDS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+    function moveForwardOneWord() {
+        let startIndex = getIndex();
+        let words_after_cursor = getSelectedContents().slice(startIndex);
+        // Loop until one of two cases met
+        while (true) {
+            if (selected_line >= contents.length) {
+                setIndex(getSelectedLine().innerText.length - 1, getSelectedLine());
+                updateFarthestIndex();
+                return;
+            }
+            // Case where we reach the end of the line, but there are more lines below
+            for (let i = 0; i < words_after_cursor.length; i++) {
+                if (words_after_cursor[i] === " ") {
+                    i++;
+                    // scan until end of white space
+                    while (i < words_after_cursor.length && words_after_cursor[i] === " ") {
+                        i++;
+                    }
+                    // If end of line, move to next line
+                    if (i >= words_after_cursor.length) {
+                        break;
+                    }
+                    // Stop here since we scanned through space and found a non space character
+                    setIndex(startIndex + i, getSelectedLine());
+                    updateFarthestIndex();
+                    return;
+                }
+                if (!WORD_WORDS.includes(words_after_cursor[i])) {
+                    if (i == 0) {
+                        // Should always at least move one char even if next char isn't a part of a word
+                        i++;
+                    }
+                    setIndex(startIndex + i, getSelectedLine());
+                    updateFarthestIndex();
+                    return;
+                }
+            }
+            // Reached the end of another file, so go around again
+            startIndex = 0;
+            selected_line++;
+            words_after_cursor = getSelectedContents();
+        }
+        // Case where the next line is empty/doesn't have any non word characters
+    }
+    function moveBackwardOneWord() {
+
+    }
     function insertAtCursor(text: string) {
         let startIndex = getIndex();
         let words_before_cursor = getSelectedContents().slice(0, startIndex);
@@ -236,6 +285,22 @@
                     break;
                 }
                 insertAtCursor("    ");// TODO: make an option if to use spaces or tabs
+                break;
+
+            case "w":
+                if (!command_mode) {
+                    break;
+                }
+                event.preventDefault();
+                moveForwardOneWord();
+                break;
+            
+            case "b":
+                if (!command_mode) {
+                    break;
+                }
+                event.preventDefault();
+                moveBackwardOneWord();
                 break;
 
         }
