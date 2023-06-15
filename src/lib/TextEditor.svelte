@@ -3,7 +3,8 @@
     import {curr_file} from "../stores"
     import {arrowLeft, arrowRight, setIndex, getIndex} from '../util';
     import EditorLine from "./EditorLine.svelte";
-    import VirtualList from "./VirtualList.svelte";
+    import VirtualList from 'svelte-tiny-virtual-list';
+
 
     let contents: Array<string> = [];
     let longest_lineno_len: number;
@@ -67,12 +68,12 @@
     const SCROLL_AMT = 22;
     function checkForScrollDown() {
         if (selected_line >= end - 2) {
-            virlist.scrollBy(0, SCROLL_AMT);
+            // virlist.scrollBy(0, SCROLL_AMT);
         }
     }
     function checkForScrollUp() {
         if (selected_line <= start + 2) {
-            virlist.scrollBy(0, -SCROLL_AMT);
+            // virlist.scrollBy(0, -SCROLL_AMT);
         }
     }
 
@@ -242,7 +243,28 @@
 
 <div class="container" >
     {#if $curr_file !== null && $curr_file.content !== null}
-    <VirtualList bind:this={virlist} items={contents.map((e, i) => [e, i])} let:item bind:start bind:end>
+    <VirtualList
+        width="100%"
+        height={600}
+        bind:itemCount={contents.length}
+        itemSize={20}>
+        >
+        <div slot="item" let:index let:style {style}>
+            <EditorLine 
+                init_content={contents[index]}
+                line_number={index + 1}
+                command_mode={command_mode}
+                handleClick={handleClick}
+                handleFocus={handleFocus}
+                handleKeyDown={handleKeyDown}
+                bind:longest_lineno_len
+                bind:this={line_elems[index]}
+                bind:innerText={$curr_file.content[index]}
+                />
+        </div>
+
+    </VirtualList>
+    <!-- <VirtualList bind:this={virlist} items={contents.map((e, i) => [e, i])} let:item bind:start bind:end>
         <EditorLine 
             init_content={item[0]}
             line_number={item[1] + 1}
@@ -254,7 +276,7 @@
             bind:this={line_elems[item[1]]}
             bind:innerText={$curr_file.content[item[1]]}
             />
-    </VirtualList>
+    </VirtualList> -->
     {/if}
 </div>
 
