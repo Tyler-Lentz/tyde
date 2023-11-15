@@ -20,7 +20,18 @@
 
 <ol>
     {#each $opened_files as file, i}
-        <li on:click={handleClick} data-mutated={file.mutated} data-path={file.path} data-selected={$curr_file === file}>{file.name}</li>
+        <li 
+            on:click={handleClick} 
+            data-mutated={file.mutated} 
+            data-path={file.path} 
+            data-selected={$curr_file === file}
+            >
+            {#if file.name == ""}
+                {"\<unnamed-file\>"}
+            {:else}
+                {file.name}
+            {/if}
+        </li>
     {/each}
 </ol>
 
