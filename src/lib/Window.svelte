@@ -57,7 +57,7 @@
                 return;
             }
 
-            invoke('save_file', { fpath: $curr_file.path, content: $curr_file.content }).then((path) => {
+            invoke('save_file', { fpath: $curr_file.path, content: $curr_file.content?.join("\n") }).then((path) => {
                 econsole.add(`Saved ${path}`)
                 if ($curr_file !== null) {
                     $curr_file.mutated = false;
