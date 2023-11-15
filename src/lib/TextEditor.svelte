@@ -314,7 +314,7 @@
     {#if $curr_file !== null && $curr_file.content !== null}
     <VirtualList
         width="100%"
-        height={600}
+        height={1000}
         bind:itemCount={contents.length}
         itemSize={20}>
         >
