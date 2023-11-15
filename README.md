@@ -8,6 +8,7 @@ A custom IDE developed mainly for fun and to learn Rust and Svelte through Tauri
 - open directory and view all files in directory
 - detect when edited file is unsaved
 - console that logs file operations
+- basic subset of vim commands
 
 ## TODO
 
@@ -18,10 +19,26 @@ A custom IDE developed mainly for fun and to learn Rust and Svelte through Tauri
 
 ### Long Term
 - navigation shortcuts
-- Vim keybindings
+- more vim commands
 - configurable themes
 - syntax highlighting
 - code autocomplete
-- in app stack overflow search
-- in app ChatGPT prompts
 - dedicated subway surfers tab (high priority)
+
+## How to set up
+
+I have only done this on Ubuntu so far.
+
+1. Install [Rust](https://www.rust-lang.org/tools/install)
+
+2. Clone this repo
+
+3. `npm install`
+
+4. `cd src-tauri && cargo build`
+
+If you run into any missing system packages, you will have to install them. 
+
+5. `cd .. && npm run tauri dev`
+
+Note: this may not work from inside of a VSCode terminal, for whatever reason.
