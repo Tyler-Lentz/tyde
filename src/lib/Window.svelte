@@ -130,15 +130,49 @@
     });
     onDestroy(() => {unsub();});
 
+    let drag_container: HTMLDivElement;
+    let drag_wrapper: HTMLDivElement;
+    let is_dragging: boolean = false;
+    let text_editor: TextEditor;
+    function handleDragStart(event: MouseEvent) {
+        is_dragging = true;
+    };
+    
+    function handleDragEnd(event: MouseEvent) {
+        is_dragging = false;
+    }
+
+    function handleDrag(event: MouseEvent) {
+        if (is_dragging) {
+            console.log("dragging")
+
+            let container_top = drag_container.offsetTop;
+            let pointer_relative_ypos = event.clientY - container_top;
+            let text_editor_min_height = 60; // minimum size the editor can take up
+
+            // drag_wrapper.style.height = (Math.max(text_editor_min_height, pointer_relative_ypos - 8)) + 'px';
+            // drag_wrapper.style.flexGrow = '0';
+        }
+    }
+
 </script>
 
 <div class="top">
     <Topbar /> 
-    <main>
+    <main class="center-area">
         <WorkspaceSidebar />
-        <div>
-            <TextEditor />
-            <Terminal />
+        <div class="drag-container" bind:this={drag_container}>
+            <div class="drag-wrapper" bind:this={drag_wrapper}>
+                <TextEditor bind:this={text_editor}/>
+            </div>
+            <div class="drag-bar" 
+                on:mousedown={handleDragStart} 
+                on:mouseup={handleDragEnd}
+                on:mousemove={handleDrag}>
+            </div>
+            <div class="drag-wrapper">
+                <Terminal />
+            </div>
         </div>
     </main>
     <EditorConsole bind:this={econsole}/>
@@ -149,7 +183,11 @@
         overflow: hidden;
     }
 
-    div {
+    main.center-area {
+        height: var(--center-area-height);
+    }
+
+    div.top, div.drag-container {
         background-color: var(--darkest-bg-color);
         display: flex;
         flex-direction: column;
@@ -158,6 +196,25 @@
         width: 100%;
         height: 100%;
     }
+
+    div.drag-bar {
+        height: 2px;
+        border: double 2px var(--darkest-bg-color);
+        width: 100%;
+        background-color: var(--dark-highlight-color);
+    }
+
+    div.drag-bar:hover {
+        background-color: var(--highlight-color);
+        cursor: ns-resize;
+    }
+
+    div.drag-wrapper {
+        flex: 1 1 auto;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
     main {
         display: flex;
         flex-direction: row;

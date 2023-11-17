@@ -52,10 +52,10 @@
 <style>
     div {
         width: 100%;
-        height: var(--terminal-height);
+        height: 100%;
         border: 1px solid var(--dark-highlight-color);
-        box-sizing: border-box;
         border-left: none;
         border-bottom: none;
+        border-top: none;
     }
 </style>

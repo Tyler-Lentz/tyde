@@ -1,0 +1,3 @@
+Bugs to fix:
+
+1. Cannot open two unnamed files at the same time.

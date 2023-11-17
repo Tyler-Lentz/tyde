@@ -344,7 +344,6 @@
         background-color: var(--dark-bg-color);
         color: var(--text-default-color);
         font-size: var(--font-size);
-        height: var(--text-editor-height);
         overflow: scroll;
     }
 </style>
