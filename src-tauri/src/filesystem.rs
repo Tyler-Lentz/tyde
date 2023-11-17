@@ -1,5 +1,6 @@
 use std::{fs::{self}, path::{PathBuf, Path}};
 use std::io;
+use tauri::api::dialog::FileDialogBuilder;
 
 #[derive(serde::Serialize, Clone, Ord, PartialOrd, PartialEq, Eq)]
 pub enum FNode {
@@ -75,4 +76,18 @@ fn visit_dirs(dir: &Path) -> io::Result<FNode> {
 pub fn save_file(fpath: String, content: String) -> Result<String, String> {
     fs::write(fpath.clone(), content).map_err(|e| e.to_string())?;
     Ok(fpath)
+}
+
+#[tauri::command]
+pub fn save_as_file(content: String, window: tauri::Window) {
+    FileDialogBuilder::new()
+        .set_title("Save as")
+        .save_file(move |file_path| {
+            if let Some(file_path) = file_path {
+                let res = fs::write(file_path.clone(), content).map_err(|e| e.to_string());
+                if let Err(e) = window.emit("save-as-file-completed", res.and(Ok(file_path.to_str()))) {
+                    eprintln!("{}", e);
+                }
+            }
+        });
 }

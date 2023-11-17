@@ -14,7 +14,7 @@ fn main() {
         .menu(ui::build_menu())
         .on_menu_event(ui::handle_menu_events)
         .invoke_handler(tauri::generate_handler![
-            filesystem::save_file, filesystem::open_file,
+            filesystem::save_file, filesystem::save_as_file, filesystem::open_file,
             terminal::async_write_to_pty, terminal::async_resize_pty,
         ])
         .manage(terminal::TerminalState {

@@ -66,6 +66,31 @@
         }
     });
 
+    appWindow.listen('save-as-file', (_) => {
+        if ($curr_file !== null) {
+            invoke('save_as_file', {content: $curr_file.content?.join("\n") });
+        } else {
+            econsole.add("No file currently loaded.");
+        }
+    });
+
+    appWindow.listen('save-as-file-completed', (event: any) => {
+        if ("Ok" in event.payload && $curr_file != null) {
+            let filepath = event.payload.Ok;
+
+            if ($curr_file.name == "") {
+                econsole.add(`Saved unnamed file as ${filepath}.`);
+            } else {
+                econsole.add(`Saved ${$curr_file.path} as ${filepath}.`)
+            }
+
+            $curr_file.path = filepath;
+            $curr_file.name = filepath.split('/').at(-1) || filepath;
+        } else {
+            econsole.add(event.payload.Err);
+        }
+    });
+
     appWindow.listen('new-file', (_) => {
         opened_files.update((files) => {
             let file = new TFile("", "");
