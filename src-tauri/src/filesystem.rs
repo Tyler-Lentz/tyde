@@ -1,6 +1,7 @@
-use std::{fs::{self}, path::{PathBuf, Path}};
+use std::{fs::{self}, path::{PathBuf, Path}, sync::{Arc, Mutex}};
 use std::io;
 use tauri::api::dialog::FileDialogBuilder;
+use notify::Watcher;
 
 #[derive(serde::Serialize, Clone, Ord, PartialOrd, PartialEq, Eq)]
 pub enum FNode {

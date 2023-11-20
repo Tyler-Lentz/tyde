@@ -1,6 +1,8 @@
+use notify::{Watcher, INotifyWatcher, RecursiveMode};
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder};
 use crate::filesystem;
+use std::sync::{Arc, Mutex};
 
 
 pub fn build_menu() -> Menu {
@@ -20,7 +22,7 @@ pub fn build_menu() -> Menu {
     Menu::new().add_submenu(file_menu)
 }
 
-pub fn handle_menu_events(event: WindowMenuEvent) {
+pub fn handle_menu_events(event: WindowMenuEvent, watcher: Arc<Mutex<INotifyWatcher>>) {
     match event.menu_item_id() {
         "open" => {
             FileDialogBuilder::new()
@@ -67,9 +69,10 @@ pub fn handle_menu_events(event: WindowMenuEvent) {
                 .pick_folder(move |dir_path| {
                     let window = event.window();
                     if let Some(dir_path) = dir_path {
-                        match filesystem::open_dir(dir_path) {
+                        match filesystem::open_dir(dir_path.clone()) {
                             Ok(message) => {
                                 let res = window.emit("open-directory", message);
+                                let _ = watcher.lock().unwrap().watch(dir_path.as_ref(), RecursiveMode::Recursive);
                                 if let Err(e) = res {
                                     eprintln!("{}", e);
                                 }
