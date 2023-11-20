@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::sync::{Arc,Mutex};
+use std::pin::Pin;
 use tauri::async_runtime::Mutex as AsyncMutex;
 
 mod filesystem;
@@ -22,7 +23,7 @@ fn main() {
             writer: Arc::new(AsyncMutex::new(terminal.writer)),
         })
         .manage(filesystem::FileWatchState {
-            info: Arc::new(Mutex::new(filesystem::FileWatchInfo{watcher: None, dir: None}))
+            info: Pin::new(Arc::new(Mutex::new(filesystem::FileWatchInfo{watcher: None, dir: None})))
         })
         .on_page_load(move |window, _| {
             terminal::reader_thread(window.clone(), terminal.reader.clone());

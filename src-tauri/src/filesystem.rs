@@ -5,12 +5,12 @@ use notify::{Event, EventKind, INotifyWatcher};
 
 
 pub struct FileWatchInfo {
-    pub watcher: Option<Pin<INotifyWatcher>>,
-    pub dir: Option<Pin<PathBuf>>,
+    pub watcher: Option<INotifyWatcher>,
+    pub dir: Option<PathBuf>,
 }
 
 pub struct FileWatchState {
-    pub info: Arc<Mutex<FileWatchInfo>>,
+    pub info: Pin<Arc<Mutex<FileWatchInfo>>>,
 }
 
 

@@ -113,6 +113,10 @@
         root.set(top);
     });
 
+    appWindow.listen('test', () => {
+        console.log("Test");
+    });
+
     let old_num_files: number = 0;
 
     let unsub = opened_files.subscribe((ofiles) => {

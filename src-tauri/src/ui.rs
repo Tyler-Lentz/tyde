@@ -68,7 +68,7 @@ pub fn handle_menu_events(event: WindowMenuEvent) {
             FileDialogBuilder::new()
                 .set_title("Select Directory to Open")
                 .pick_folder(move |dir_path| {
-                    let window = event.window();
+                    let window = event.window().clone();
                     if let Some(dir_path) = dir_path {
                         match filesystem::open_dir(dir_path.clone()) {
                             Ok(message) => {
@@ -76,23 +76,27 @@ pub fn handle_menu_events(event: WindowMenuEvent) {
 
                                 let handle = window.app_handle();
                                 let state: State<'_, FileWatchState> = handle.state();
-                                let state = state.info.lock().unwrap();
+                                let mut state = state.info.lock().unwrap();
 
-                                match state.watcher {
+                                match &mut state.watcher {
                                     None => {
-                                        state.watcher = Some(Pin::new(notify::recommended_watcher(|e| {
-                                            if let Ok(event) = e {
-                                                filesystem::dir_listen(event, window);
+                                        // Set up listener function since this is the first time
+                                        state.watcher = Some(notify::recommended_watcher(move |e| {
+                                            if let Ok(e) = e {
+                                                filesystem::dir_listen(e, &window);
                                             }
-                                        }).unwrap()));
-                                        state.dir = Some(dir_path);
+                                        }).unwrap());
                                     },
                                     Some(watcher) => {
-                                        watcher.unwatch(state.dir.unwrap().as_path());
-                                        state.dir = Some(dir_path);
+                                        // Unwatch old path
                                     }
                                 }
-                                // state.watcher.unwrap().lock().unwrap().watch(state.dir.unwrap().lock().unwrap().as_path(), RecursiveMode::Recursive);
+
+                                state.dir = Some(dir_path.clone());
+
+                                if let Some(watcher) = &mut state.watcher {
+                                    watcher.watch(dir_path.as_path(), RecursiveMode::Recursive);
+                                }
 
                                 if let Err(e) = res {
                                     eprintln!("{}", e);
