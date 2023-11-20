@@ -1,6 +1,9 @@
-use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
+use notify::{Watcher, RecursiveMode};
+use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent, Manager, State};
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder};
-use crate::filesystem;
+use crate::filesystem::{self, FileWatchState};
+use std::sync::{Arc, Mutex};
+use std::pin::Pin;
 
 
 pub fn build_menu() -> Menu {
@@ -65,11 +68,36 @@ pub fn handle_menu_events(event: WindowMenuEvent) {
             FileDialogBuilder::new()
                 .set_title("Select Directory to Open")
                 .pick_folder(move |dir_path| {
-                    let window = event.window();
+                    let window = event.window().clone();
                     if let Some(dir_path) = dir_path {
-                        match filesystem::open_dir(dir_path) {
+                        match filesystem::open_dir(dir_path.clone()) {
                             Ok(message) => {
                                 let res = window.emit("open-directory", message);
+
+                                let handle = window.app_handle();
+                                let state: State<'_, FileWatchState> = handle.state();
+                                let mut state = state.info.lock().unwrap();
+
+                                match &mut state.watcher {
+                                    None => {
+                                        // Set up listener function since this is the first time
+                                        state.watcher = Some(notify::recommended_watcher(move |e| {
+                                            if let Ok(e) = e {
+                                                filesystem::dir_listen(e, &window);
+                                            }
+                                        }).unwrap());
+                                    },
+                                    Some(watcher) => {
+                                        // Unwatch old path
+                                    }
+                                }
+
+                                state.dir = Some(dir_path.clone());
+
+                                if let Some(watcher) = &mut state.watcher {
+                                    watcher.watch(dir_path.as_path(), RecursiveMode::Recursive);
+                                }
+
                                 if let Err(e) = res {
                                     eprintln!("{}", e);
                                 }

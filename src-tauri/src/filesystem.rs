@@ -1,6 +1,18 @@
-use std::{fs::{self}, path::{PathBuf, Path}};
+use std::{fs::{self}, path::{PathBuf, Path}, sync::{Arc, Mutex}, pin::Pin};
 use std::io;
-use tauri::api::dialog::FileDialogBuilder;
+use tauri::{api::dialog::FileDialogBuilder, Window};
+use notify::{Event, EventKind, INotifyWatcher};
+
+
+pub struct FileWatchInfo {
+    pub watcher: Option<INotifyWatcher>,
+    pub dir: Option<PathBuf>,
+}
+
+pub struct FileWatchState {
+    pub info: Pin<Arc<Mutex<FileWatchInfo>>>,
+}
+
 
 #[derive(serde::Serialize, Clone, Ord, PartialOrd, PartialEq, Eq)]
 pub enum FNode {
@@ -90,4 +102,14 @@ pub fn save_as_file(content: String, window: tauri::Window) {
                 }
             }
         });
+}
+
+pub fn dir_listen(e: Event, window: &Window) {
+    match e.kind {
+        EventKind::Create(_) |
+        EventKind::Remove(_) => {
+            window.emit("test", ());
+        },
+        _ => {}
+    }
 }
