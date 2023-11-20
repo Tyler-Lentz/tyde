@@ -9,15 +9,10 @@ mod ui;
 mod terminal;
 fn main() {
     let terminal = terminal::Terminal::new();
-    let watcher = Arc::new(Mutex::new(notify::recommended_watcher(|e| {
-        if let Ok(e) = e {
-            println!("{:?}", e);
-        }
-    }).unwrap()));
 
     tauri::Builder::default()
         .menu(ui::build_menu())
-        .on_menu_event(move |event| {ui::handle_menu_events(event, watcher.clone())})
+        .on_menu_event(ui::handle_menu_events)
         .invoke_handler(tauri::generate_handler![
             filesystem::save_file, filesystem::save_as_file, filesystem::open_file,
             terminal::async_write_to_pty, terminal::async_resize_pty,
@@ -25,6 +20,9 @@ fn main() {
         .manage(terminal::TerminalState {
             pty_pair: Arc::new(AsyncMutex::new(terminal.pty_pair)),
             writer: Arc::new(AsyncMutex::new(terminal.writer)),
+        })
+        .manage(filesystem::FileWatchState {
+            info: Arc::new(Mutex::new(filesystem::FileWatchInfo{watcher: None, dir: None}))
         })
         .on_page_load(move |window, _| {
             terminal::reader_thread(window.clone(), terminal.reader.clone());

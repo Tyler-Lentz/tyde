@@ -1,8 +1,9 @@
-use notify::{Watcher, INotifyWatcher, RecursiveMode};
-use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
+use notify::{Watcher, RecursiveMode};
+use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent, Manager, State};
 use tauri::api::dialog::{FileDialogBuilder, MessageDialogBuilder};
-use crate::filesystem;
+use crate::filesystem::{self, FileWatchState};
 use std::sync::{Arc, Mutex};
+use std::pin::Pin;
 
 
 pub fn build_menu() -> Menu {
@@ -22,7 +23,7 @@ pub fn build_menu() -> Menu {
     Menu::new().add_submenu(file_menu)
 }
 
-pub fn handle_menu_events(event: WindowMenuEvent, watcher: Arc<Mutex<INotifyWatcher>>) {
+pub fn handle_menu_events(event: WindowMenuEvent) {
     match event.menu_item_id() {
         "open" => {
             FileDialogBuilder::new()
@@ -72,7 +73,27 @@ pub fn handle_menu_events(event: WindowMenuEvent, watcher: Arc<Mutex<INotifyWatc
                         match filesystem::open_dir(dir_path.clone()) {
                             Ok(message) => {
                                 let res = window.emit("open-directory", message);
-                                let _ = watcher.lock().unwrap().watch(dir_path.as_ref(), RecursiveMode::Recursive);
+
+                                let handle = window.app_handle();
+                                let state: State<'_, FileWatchState> = handle.state();
+                                let state = state.info.lock().unwrap();
+
+                                match state.watcher {
+                                    None => {
+                                        state.watcher = Some(Pin::new(notify::recommended_watcher(|e| {
+                                            if let Ok(event) = e {
+                                                filesystem::dir_listen(event, window);
+                                            }
+                                        }).unwrap()));
+                                        state.dir = Some(dir_path);
+                                    },
+                                    Some(watcher) => {
+                                        watcher.unwatch(state.dir.unwrap().as_path());
+                                        state.dir = Some(dir_path);
+                                    }
+                                }
+                                // state.watcher.unwrap().lock().unwrap().watch(state.dir.unwrap().lock().unwrap().as_path(), RecursiveMode::Recursive);
+
                                 if let Err(e) = res {
                                     eprintln!("{}", e);
                                 }
